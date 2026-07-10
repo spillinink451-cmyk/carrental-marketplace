@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { LogOut } from "lucide-react";
 
 export default function Nav({ partnerRole }: { partnerRole: "owner" | "branch_admin" | "staff" | null }) {
   const pathname = usePathname();
@@ -49,21 +50,29 @@ export default function Nav({ partnerRole }: { partnerRole: "owner" | "branch_ad
         <div className="flex items-center gap-3">
           {session?.user ? (
             <>
-          {partnerRole && (
-            <Link
-              href="/partner"
-              className={`inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-2.5 sm:px-3 py-1.5 rounded-full ${
-                solid ? "text-brand bg-brand/10" : "text-white bg-white/15"
-              }`}
-            >
-              <span className="sm:hidden">Dashboard</span>
-              <span className="hidden sm:inline">Partner Dashboard</span>
-              <span className="hidden sm:inline text-[10px] uppercase opacity-70 capitalize">{partnerRole.replace("_", " ")}</span>
-            </Link>
-          )}
+              {partnerRole && (
+                <Link
+                  href="/partner"
+                  className={`inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium px-2.5 sm:px-3 py-1.5 rounded-full ${
+                    solid ? "text-brand bg-brand/10" : "text-white bg-white/15"
+                  }`}
+                >
+                  <span className="sm:hidden">Dashboard</span>
+                  <span className="hidden sm:inline">Partner Dashboard</span>
+                  <span className="hidden sm:inline text-[10px] uppercase opacity-70 capitalize">{partnerRole.replace("_", " ")}</span>
+                </Link>
+              )}
               <Link href="/bookings" className={`text-sm font-medium ${solid ? "text-slate-600" : "text-white/90"} hover:opacity-70 transition-opacity`}>
                 My bookings
               </Link>
+              <button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                title="Log out"
+                className={`flex items-center gap-1 text-sm font-medium ${solid ? "text-slate-500" : "text-white/80"} hover:opacity-70 transition-opacity`}
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Log out</span>
+              </button>
             </>
           ) : (
             <>
