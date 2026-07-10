@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:seed": "tsx src/db/seed.ts",
     "db:link-partner": "tsx src/db/link-partner.ts"
   },
   "dependencies": {
