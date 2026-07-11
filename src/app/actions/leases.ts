@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/db";
-import { leaseAgreements, leaseTemplates, bookings, cars, carBrands, carModels, companies, users } from "@/db/schema";
+import { leaseAgreements, leaseTemplates, bookings, cars, carBrands, carModels, companies, users, countries, cities, branches } from "@/db/schema";
 import { auth } from "@/auth";
 import { eq, desc } from "drizzle-orm";
 import { encrypt, decrypt } from "@/lib/encryption";
@@ -113,16 +113,30 @@ async function finalizeIfFullySigned(leaseId: string) {
   const [lease] = await db.select().from(leaseAgreements).where(eq(leaseAgreements.id, leaseId));
   if (!lease || !lease.customerSignatureUrl || !lease.companySignatureUrl) return;
 
-  const [company] = await db.select({ currency: companies.currency }).from(companies).where(eq(companies.id, lease.companyId));
+  const [company] = await db
+    .select({ currency: companies.currency, idDocumentLabel: countries.idDocumentLabel })
+    .from(companies)
+    .innerJoin(countries, eq(companies.country, countries.code))
+    .where(eq(companies.id, lease.companyId));
+
+  const [branchInfo] = await db
+    .select({ timezone: cities.timezone })
+    .from(branches)
+    .innerJoin(cities, eq(branches.cityId, cities.id))
+    .where(eq(branches.id, lease.branchId));
+  const timezone = branchInfo?.timezone ?? "UTC";
 
   const pdfBuffer = await generateLeasePDF({
+    id: lease.id,
     companyNameSnapshot: lease.companyNameSnapshot, carSnapshot: lease.carSnapshot,
     lesseeName: lease.lesseeName, lesseePhone: lease.lesseePhone, lesseeCnic: decrypt(lease.lesseeCnicEncrypted),
+    idDocumentLabel: company?.idDocumentLabel ?? "ID Number",
     startDate: lease.startDate, endDate: lease.endDate,
     pricePerDay: lease.pricePerDay, totalAmount: lease.totalAmount, depositAmount: lease.depositAmount,
     mileageLimitKm: lease.mileageLimitKm, fuelPolicy: lease.fuelPolicy, lateFeePerDay: lease.lateFeePerDay,
     termsAndConditions: lease.termsAndConditions,
     currency: company?.currency ?? "PKR",
+    timezone,
     customerSignatureUrl: lease.customerSignatureUrl, customerSignedAt: lease.customerSignedAt!,
     companySignatureUrl: lease.companySignatureUrl, companySignedAt: lease.companySignedAt!,
   });
@@ -130,6 +144,7 @@ async function finalizeIfFullySigned(leaseId: string) {
   const pdfKey = await uploadLeaseDocument(`${lease.id}.pdf`, pdfBuffer, "application/pdf");
   await db.update(leaseAgreements).set({ status: "active", pdfUrl: pdfKey }).where(eq(leaseAgreements.id, leaseId));
 }
+
 
 export async function signLeaseAsCustomer(leaseId: string, signatureUrl: string) {
   const session = await auth();

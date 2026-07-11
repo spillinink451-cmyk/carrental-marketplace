@@ -272,13 +272,20 @@ export async function getLeaseByBookingId(bookingId: string) {
 
 export async function getLeaseById(id: string) {
   const [row] = await db
-    .select({ lease: leaseAgreements, currency: companies.currency, idDocumentLabel: countries.idDocumentLabel })
+    .select({
+      lease: leaseAgreements,
+      currency: companies.currency,
+      idDocumentLabel: countries.idDocumentLabel,
+      timezone: cities.timezone,
+    })
     .from(leaseAgreements)
     .innerJoin(companies, eq(leaseAgreements.companyId, companies.id))
     .innerJoin(countries, eq(companies.country, countries.code))
+    .innerJoin(branches, eq(leaseAgreements.branchId, branches.id))
+    .innerJoin(cities, eq(branches.cityId, cities.id))
     .where(eq(leaseAgreements.id, id));
   if (!row) return null;
-  return { ...row.lease, currency: row.currency, idDocumentLabel: row.idDocumentLabel };
+  return { ...row.lease, currency: row.currency, idDocumentLabel: row.idDocumentLabel, timezone: row.timezone };
 }
 
 export async function getCarsForBranchSimple(branchId: string) {

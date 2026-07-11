@@ -4,6 +4,8 @@ import { notFound, redirect } from "next/navigation";
 import { decrypt } from "@/lib/encryption";
 import SignAndSubmit from "@/components/SignAndSubmit";
 import { signLeaseAsCustomer } from "@/app/actions/leases";
+import { formatCurrency } from "@/lib/currency";
+import { formatDate, formatDateTime } from "@/lib/datetime";
 
 export default async function CustomerLeasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -24,15 +26,15 @@ export default async function CustomerLeasePage({ params }: { params: Promise<{ 
         <p className="text-slate-500 mb-6">{lease.carSnapshot} · {lease.companyNameSnapshot}</p>
 
         <div className="grid grid-cols-2 gap-4 text-sm mb-6">
-          <div><span className="text-slate-400 block text-xs">Start</span>{new Date(lease.startDate).toLocaleDateString()}</div>
-          <div><span className="text-slate-400 block text-xs">End</span>{new Date(lease.endDate).toLocaleDateString()}</div>
-          <div><span className="text-slate-400 block text-xs">Total</span>{lease.totalAmount}</div>
-          <div><span className="text-slate-400 block text-xs">Deposit</span>{lease.depositAmount}</div>
+          <div><span className="text-slate-400 block text-xs">Start</span>{formatDate(lease.startDate, lease.timezone)}</div>
+          <div><span className="text-slate-400 block text-xs">End</span>{formatDate(lease.endDate, lease.timezone)}</div>
+          <div><span className="text-slate-400 block text-xs">Total</span>{formatCurrency(lease.totalAmount, lease.currency)}</div>
+          <div><span className="text-slate-400 block text-xs">Deposit</span>{formatCurrency(lease.depositAmount, lease.currency)}</div>
         </div>
 
         <div className="border-t border-gray-100 pt-4 mb-6">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Your details</h2>
-          <p className="text-sm text-slate-700">{lease.lesseeName} · {lease.lesseePhone} · {cnic}</p>
+          <p className="text-sm text-slate-700">{lease.lesseeName} · {lease.lesseePhone} · {lease.idDocumentLabel}: {cnic}</p>
         </div>
 
         <div className="border-t border-gray-100 pt-4 mb-6">
@@ -43,14 +45,14 @@ export default async function CustomerLeasePage({ params }: { params: Promise<{ 
         <div className="border-t border-gray-100 pt-4 mb-4">
           <h2 className="font-semibold text-slate-800 mb-3">Your signature</h2>
           {lease.customerSignatureUrl ? (
-            <p className="text-sm text-emerald-600">✓ Signed on {new Date(lease.customerSignedAt!).toLocaleString()}</p>
+            <p className="text-sm text-emerald-600">✓ Signed on {formatDateTime(lease.customerSignedAt!, lease.timezone)}</p>
           ) : (
             <SignAndSubmit leaseId={lease.id} label="Sign here to accept the lease" onSign={signLeaseAsCustomer} />
           )}
         </div>
 
         <p className="text-sm text-slate-400 mb-4">
-          {lease.companySignatureUrl ? `✓ Company signed on ${new Date(lease.companySignedAt!).toLocaleString()}` : "Waiting for company signature."}
+          {lease.companySignatureUrl ? `✓ Company signed on ${formatDateTime(lease.companySignedAt!, lease.timezone)}` : "Waiting for company signature."}
         </p>
 
         {lease.status === "active" && (
