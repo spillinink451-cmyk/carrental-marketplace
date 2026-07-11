@@ -39,13 +39,11 @@ export default function Nav({ partnerRole }: { partnerRole: "owner" | "branch_ad
           <span className={`font-bold text-xl tracking-tight ${solid ? "text-slate-800" : "text-white"}`}>Waypoint</span>
         </Link>
 
-        <nav className={`hidden md:flex items-center gap-8 text-sm font-medium ${solid ? "text-slate-600" : "text-white/90"}`}>
-          <Link href="/" className="hover:opacity-70 transition-opacity">Cars</Link>
-          <Link href="/" className="hover:opacity-70 transition-opacity">Deals</Link>
-          <Link href="/" className="hover:opacity-70 transition-opacity">Help</Link>
-          <button className="hover:opacity-70 transition-opacity">EN</button>
-          <button className="hover:opacity-70 transition-opacity">PKR</button>
-        </nav>
+<nav className={`hidden md:flex items-center gap-8 text-sm font-medium ${solid ? "text-slate-600" : "text-white/90"}`}>
+  <Link href="/" className="hover:opacity-70 transition-opacity">Cars</Link>
+  <Link href="/" className="hover:opacity-70 transition-opacity">Deals</Link>
+  <Link href="/" className="hover:opacity-70 transition-opacity">Help</Link>
+</nav>
 
         <div className="flex items-center gap-3">
           {session?.user ? (

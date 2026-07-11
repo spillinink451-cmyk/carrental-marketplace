@@ -10,9 +10,8 @@ import { uploadLeaseDocument } from "@/lib/r2";
 import { generateLeasePDF } from "@/lib/lease-pdf";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
-import { getSignatureReadUrl } from "@/lib/r2";
+;
 
 const DEFAULT_TERMS =
   "The lessee agrees to return the vehicle in the condition it was received, subject to normal wear and tear. " +
@@ -114,6 +113,8 @@ async function finalizeIfFullySigned(leaseId: string) {
   const [lease] = await db.select().from(leaseAgreements).where(eq(leaseAgreements.id, leaseId));
   if (!lease || !lease.customerSignatureUrl || !lease.companySignatureUrl) return;
 
+  const [company] = await db.select({ currency: companies.currency }).from(companies).where(eq(companies.id, lease.companyId));
+
   const pdfBuffer = await generateLeasePDF({
     companyNameSnapshot: lease.companyNameSnapshot, carSnapshot: lease.carSnapshot,
     lesseeName: lease.lesseeName, lesseePhone: lease.lesseePhone, lesseeCnic: decrypt(lease.lesseeCnicEncrypted),
@@ -121,6 +122,7 @@ async function finalizeIfFullySigned(leaseId: string) {
     pricePerDay: lease.pricePerDay, totalAmount: lease.totalAmount, depositAmount: lease.depositAmount,
     mileageLimitKm: lease.mileageLimitKm, fuelPolicy: lease.fuelPolicy, lateFeePerDay: lease.lateFeePerDay,
     termsAndConditions: lease.termsAndConditions,
+    currency: company?.currency ?? "PKR",
     customerSignatureUrl: lease.customerSignatureUrl, customerSignedAt: lease.customerSignedAt!,
     companySignatureUrl: lease.companySignatureUrl, companySignedAt: lease.companySignedAt!,
   });

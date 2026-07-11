@@ -1,5 +1,6 @@
 import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import { getSignatureReadUrl } from "@/lib/r2";
+import { formatCurrency } from "@/lib/currency"; 
 
 function wrapText(text: string, maxCharsPerLine: number): string[] {
   const words = text.split(" ");
@@ -24,6 +25,7 @@ export async function generateLeasePDF(lease: {
   pricePerDay: string; totalAmount: string; depositAmount: string;
   mileageLimitKm: number | null; fuelPolicy: string; lateFeePerDay: string | null;
   termsAndConditions: string;
+  currency: string;
   customerSignatureUrl: string; customerSignedAt: Date;
   companySignatureUrl: string; companySignedAt: Date;
 }): Promise<Buffer> {
@@ -53,13 +55,13 @@ export async function generateLeasePDF(lease: {
   y -= 10;
 
   text("Financial Terms", { size: 13, bold: true, gap: 22 });
-  text(`Price per day: ${lease.pricePerDay}`);
-  text(`Total amount: ${lease.totalAmount}`);
-  text(`Deposit: ${lease.depositAmount}`);
-  if (lease.mileageLimitKm) text(`Mileage limit: ${lease.mileageLimitKm} km`);
-  text(`Fuel policy: ${lease.fuelPolicy}`);
-  if (lease.lateFeePerDay) text(`Late fee per day: ${lease.lateFeePerDay}`);
-  y -= 10;
+  text(`Price per day: ${formatCurrency(lease.pricePerDay, lease.currency)}`);
+text(`Total amount: ${formatCurrency(lease.totalAmount, lease.currency)}`);
+text(`Deposit: ${formatCurrency(lease.depositAmount, lease.currency)}`);
+if (lease.mileageLimitKm) text(`Mileage limit: ${lease.mileageLimitKm} km`);
+text(`Fuel policy: ${lease.fuelPolicy}`);
+if (lease.lateFeePerDay) text(`Late fee per day: ${formatCurrency(lease.lateFeePerDay, lease.currency)}`);
+y -= 10;
 
   text("Terms & Conditions", { size: 13, bold: true, gap: 22 });
   for (const line of wrapText(lease.termsAndConditions, 95)) {
