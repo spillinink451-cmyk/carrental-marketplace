@@ -1,6 +1,5 @@
 import { db } from "./index";
-import { cars, companies, branches, bookings, blockedDates, handoverChecks, disputes, users, companyUsers, countries, carBrands, carModels, carCategories, cities, leaseAgreements } from "./schema";
-import { and, eq, notInArray, lt, gt, ne, type SQL } from "drizzle-orm";
+import { cars, companies, branches, bookings, blockedDates, handoverChecks, disputes, users, companyUsers, countries, carBrands, carModels, carCategories, cities, leaseAgreements } from "./schema";import { and, eq, notInArray, lt, gt, ne, type SQL } from "drizzle-orm";
 
 
 import { asc } from "drizzle-orm";
@@ -63,10 +62,11 @@ export async function getActiveCars(filters: CarFilters = {}) {
 
   return db
     .select({
-      id: cars.id, brand: carBrands.name, model: carModels.name, category: carCategories.name,
-      seats: cars.seats, transmission: cars.transmission, fuelType: cars.fuelType,
-      pricePerDay: cars.pricePerDay, images: cars.images, companyName: companies.name, city: cities.name,
-    })
+              id: cars.id, brand: carBrands.name, model: carModels.name, category: carCategories.name,
+              seats: cars.seats, transmission: cars.transmission, fuelType: cars.fuelType,
+              pricePerDay: cars.pricePerDay, images: cars.images, companyName: companies.name, city: cities.name,
+              currency: companies.currency,
+            })
     .from(cars)
     .innerJoin(companies, eq(cars.companyId, companies.id))
     .innerJoin(branches, eq(cars.branchId, branches.id))
@@ -94,6 +94,7 @@ export async function getCarById(id: string) {
       seats: cars.seats, doors: cars.doors, transmission: cars.transmission, fuelType: cars.fuelType,
       pricePerDay: cars.pricePerDay, depositPercentage: cars.depositPercentage, images: cars.images,
       companyName: companies.name, branchId: branches.id, city: cities.name, area: branches.area, address: branches.address,
+      currency: companies.currency,
     })
     .from(cars)
     .innerJoin(companies, eq(cars.companyId, companies.id))
@@ -115,19 +116,20 @@ export async function getBookingById(id: string) {
       driverName: bookings.driverName, driverPhone: bookings.driverPhone, driverCnic: bookings.driverCnic,
       carBrand: carBrands.name, carModel: carModels.name, companyName: companies.name,
       locationCity: cities.name, locationAddress: branches.address,
+      currency: companies.currency, idDocumentLabel: countries.idDocumentLabel,
     })
     .from(bookings)
     .innerJoin(cars, eq(bookings.carId, cars.id))
     .innerJoin(carBrands, eq(cars.brandId, carBrands.id))
     .innerJoin(carModels, eq(cars.modelId, carModels.id))
     .innerJoin(companies, eq(bookings.companyId, companies.id))
+    .innerJoin(countries, eq(companies.country, countries.code))
     .innerJoin(branches, eq(bookings.pickupBranchId, branches.id))
     .innerJoin(cities, eq(branches.cityId, cities.id))
     .where(eq(bookings.id, id));
   if (!row) return null;
   return { ...row, driverCnic: decrypt(row.driverCnic) };
 }
-
 
 
 export async function getCarsByCompany(companyId: string) {
@@ -269,8 +271,14 @@ export async function getLeaseByBookingId(bookingId: string) {
 }
 
 export async function getLeaseById(id: string) {
-  const [lease] = await db.select().from(leaseAgreements).where(eq(leaseAgreements.id, id));
-  return lease ?? null;
+  const [row] = await db
+    .select({ lease: leaseAgreements, currency: companies.currency, idDocumentLabel: countries.idDocumentLabel })
+    .from(leaseAgreements)
+    .innerJoin(companies, eq(leaseAgreements.companyId, companies.id))
+    .innerJoin(countries, eq(companies.country, countries.code))
+    .where(eq(leaseAgreements.id, id));
+  if (!row) return null;
+  return { ...row.lease, currency: row.currency, idDocumentLabel: row.idDocumentLabel };
 }
 
 export async function getCarsForBranchSimple(branchId: string) {

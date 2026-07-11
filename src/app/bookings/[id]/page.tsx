@@ -1,8 +1,8 @@
 import { auth } from "@/auth";
-import { getBookingById } from "@/db/queries";
+import { getBookingById, getLeaseByBookingId } from "@/db/queries";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
-import { getLeaseByBookingId } from "@/db/queries";
+import { formatCurrency } from "@/lib/currency";
 
 export default async function BookingConfirmationPage({
   params,
@@ -14,7 +14,7 @@ export default async function BookingConfirmationPage({
   if (!session?.user?.id) redirect("/login");
 
   const booking = await getBookingById(id);
-  
+
   if (!booking) notFound();
   if (booking.userId !== session.user.id) notFound();
   const lease = await getLeaseByBookingId(booking.id);
@@ -30,7 +30,6 @@ export default async function BookingConfirmationPage({
     cancelled: "text-red-600 bg-red-50",
     disputed: "text-red-600 bg-red-50",
   };
-
 
   return (
     <main className="max-w-lg mx-auto px-6 pt-28 pb-16">
@@ -79,26 +78,26 @@ export default async function BookingConfirmationPage({
           <div className="text-sm space-y-1">
             <p><span className="text-slate-400">Name:</span> {booking.driverName}</p>
             <p><span className="text-slate-400">Phone:</span> {booking.driverPhone}</p>
-            <p><span className="text-slate-400">National ID:</span> {booking.driverCnic}</p>
+            <p><span className="text-slate-400">{booking.idDocumentLabel}:</span> {booking.driverCnic}</p>
           </div>
         </div>
 
         <div className="border-t border-gray-100 pt-4 space-y-2 text-sm">
           <div className="flex justify-between text-slate-500">
             <span>Deposit paid</span>
-            <span>Rs {Number(booking.depositAmount).toLocaleString()}</span>
+            <span>{formatCurrency(booking.depositAmount, booking.currency)}</span>
           </div>
           <div className="flex justify-between text-slate-500">
             <span>Pay at pickup</span>
-            <span>Rs {Number(booking.remainingAmount).toLocaleString()}</span>
+            <span>{formatCurrency(booking.remainingAmount, booking.currency)}</span>
           </div>
           <div className="flex justify-between text-slate-500">
             <span>Platform service fee</span>
-            <span>Rs {Number(booking.platformFee).toLocaleString()}</span>
+            <span>{formatCurrency(booking.platformFee, booking.currency)}</span>
           </div>
           <div className="flex justify-between font-bold text-slate-800 border-t border-gray-100 pt-2">
             <span>Total</span>
-            <span>Rs {total.toLocaleString()}</span>
+            <span>{formatCurrency(total, booking.currency)}</span>
           </div>
         </div>
 
@@ -110,10 +109,10 @@ export default async function BookingConfirmationPage({
           Report an issue with this booking
         </Link>
         {lease && (
-        <Link href={`/leases/${lease.id}`} className="block bg-amber-50 text-amber-800 text-sm font-medium rounded-lg px-4 py-3 mt-4 hover:bg-amber-100 transition-colors">
-          {lease.status === "active" ? "View your signed lease agreement →" : "Sign your lease agreement →"}
-        </Link>
-      )}
+          <Link href={`/leases/${lease.id}`} className="block bg-amber-50 text-amber-800 text-sm font-medium rounded-lg px-4 py-3 mt-4 hover:bg-amber-100 transition-colors">
+            {lease.status === "active" ? "View your signed lease agreement →" : "Sign your lease agreement →"}
+          </Link>
+        )}
       </div>
     </main>
   );

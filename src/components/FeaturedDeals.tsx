@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import FadeInWhenVisible from "./motion/FadeInWhenVisible";
+import { formatCurrency } from "@/lib/currency";
 
 type Car = {
   id: string;
@@ -17,9 +18,11 @@ type Car = {
   companyName: string;
   city: string;
   images: string[];
+  currency: string;
 };
 
-export default function FeaturedDeals({ cars, dateQuery }: { cars: Car[]; dateQuery?: string }) {  return (
+export default function FeaturedDeals({ cars }: { cars: Car[] }) {
+  return (
     <section id="fleet" className="max-w-7xl mx-auto px-6 py-20">
       <FadeInWhenVisible>
         <div className="flex items-end justify-between mb-10">
@@ -42,7 +45,6 @@ export default function FeaturedDeals({ cars, dateQuery }: { cars: Car[]; dateQu
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
               className="bg-white border border-gray-200 rounded-[20px] overflow-hidden hover:shadow-xl transition-shadow duration-300 group h-full"
             >
-              {/* Car Image */}
               <div className="relative h-56 w-full overflow-hidden bg-gray-100">
                 {car.images?.length > 0 ? (
                   <Image
@@ -59,13 +61,11 @@ export default function FeaturedDeals({ cars, dateQuery }: { cars: Car[]; dateQu
                 )}
               </div>
 
-              {/* Card Content */}
               <div className="p-5">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <h3 className="font-semibold text-lg text-slate-800">
                     {car.brand} {car.model}
                   </h3>
-
                   <span className="shrink-0 text-[10px] uppercase font-semibold tracking-wide text-brand bg-brand/10 px-2.5 py-1 rounded-full">
                     {car.category}
                   </span>
@@ -85,21 +85,16 @@ export default function FeaturedDeals({ cars, dateQuery }: { cars: Car[]; dateQu
 
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <span className="font-bold text-lg text-slate-800">
-                    Rs {Number(car.pricePerDay).toLocaleString()}
-                    <span className="text-xs font-normal text-slate-500">
-                      {" "}
-                      /day
-                    </span>
+                    {formatCurrency(car.pricePerDay, car.currency)}
+                    <span className="text-xs font-normal text-slate-500"> /day</span>
                   </span>
 
-                    
-
-                    <Link
-                        href={dateQuery ? `/cars/${car.id}?${dateQuery}` : `/cars/${car.id}`}
-                        className="bg-brand hover:bg-brand-dark text-white text-sm font-semibold px-4 py-2.5 rounded-full transition-colors"
-                      >
-                        View Details
-                      </Link>
+                  <Link
+                    href={`/cars/${car.id}`}
+                    className="bg-brand hover:bg-brand-dark text-white text-sm font-semibold px-4 py-2.5 rounded-full transition-colors"
+                  >
+                    View Details
+                  </Link>
                 </div>
               </div>
             </motion.div>

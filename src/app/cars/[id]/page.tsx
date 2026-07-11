@@ -134,6 +134,7 @@ const profile = session?.user?.id ? await getUserProfile(session.user.id) : null
               depositPercentage={Number(car.depositPercentage)}
               initialPickup={pickupAt}
               initialDropoff={dropoffAt}
+              currency={car.currency}
               initialDriverName={profile?.name ?? session?.user?.name ?? ""}
               initialDriverPhone={profile?.phone ?? ""}
               initialDriverCnic={profile?.cnic ?? ""}
