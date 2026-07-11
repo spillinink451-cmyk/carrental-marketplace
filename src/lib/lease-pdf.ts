@@ -1,6 +1,7 @@
 import { PDFDocument, PDFPage, StandardFonts, PDFFont, rgb } from "pdf-lib";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate } from "@/lib/datetime";
+import { getSignatureReadUrl } from "@/lib/r2";
 
 // ---------- Layout constants ----------
 const PAGE_WIDTH = 595;
@@ -191,16 +192,17 @@ async function drawSignatureBlock(doc: LeaseDocument, opts: {
   const colX = [MARGIN_LEFT, MARGIN_LEFT + colWidth + gap];
   const topY = doc.y;
 
-  async function embed(url: string, x: number) {
-    try {
-      const bytes = await (await fetch(url)).arrayBuffer();
-      const img = await doc.pdfDoc.embedPng(bytes);
-      const dims = img.scaleToFit(140, 50);
-      doc.page.drawImage(img, { x, y: topY - dims.height, width: dims.width, height: dims.height });
-    } catch {
-      // Leave the space blank rather than failing the whole document.
-    }
+  async function embed(key: string, x: number) {
+  try {
+    const signedUrl = key.startsWith("http") ? key : await getSignatureReadUrl(key);
+    const bytes = await (await fetch(signedUrl)).arrayBuffer();
+    const img = await doc.pdfDoc.embedPng(bytes);
+    const dims = img.scaleToFit(140, 50);
+    doc.page.drawImage(img, { x, y: topY - dims.height, width: dims.width, height: dims.height });
+  } catch (err) {
+    console.error("Failed to embed signature:", err);
   }
+}
 
   await embed(opts.customerSignatureUrl, colX[0]);
   await embed(opts.companySignatureUrl, colX[1]);
