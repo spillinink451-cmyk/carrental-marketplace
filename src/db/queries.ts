@@ -1,5 +1,6 @@
 import { db } from "./index";
-import { cars, companies, branches, bookings, blockedDates, handoverChecks, disputes, users, companyUsers, countries, carBrands, carModels, carCategories, cities, leaseAgreements } from "./schema";import { and, eq, notInArray, lt, gt, ne, type SQL } from "drizzle-orm";
+import { cars, companies, branches, bookings, blockedDates, handoverChecks, disputes, users, companyUsers, countries, carBrands, carModels, carCategories, cities, leaseAgreements, leaseTemplates } from "./schema";
+import { and, eq, notInArray, lt, gt, ne, type SQL, desc } from "drizzle-orm";
 
 
 import { asc } from "drizzle-orm";
@@ -295,4 +296,14 @@ export async function getCarsForBranchSimple(branchId: string) {
     .innerJoin(carBrands, eq(cars.brandId, carBrands.id))
     .innerJoin(carModels, eq(cars.modelId, carModels.id))
     .where(eq(cars.branchId, branchId));
+}
+
+export async function getLeaseTemplateForCompany(companyId: string) {
+  const [template] = await db
+    .select()
+    .from(leaseTemplates)
+    .where(eq(leaseTemplates.companyId, companyId))
+    .orderBy(desc(leaseTemplates.createdAt))
+    .limit(1);
+  return template ?? null;
 }

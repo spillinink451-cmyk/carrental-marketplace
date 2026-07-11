@@ -18,6 +18,9 @@ export default function PartnerNav() {
       <Link href="/partner/leases/new" className="text-sm font-medium text-slate-600 hover:text-brand hover:bg-brand/5 px-4 py-2 rounded-full transition-colors">
          + New lease
       </Link>
+      <Link href="/partner/lease-template" className="text-sm font-medium text-slate-600 hover:text-brand hover:bg-brand/5 px-4 py-2 rounded-full transition-colors">
+  Lease terms
+</Link>
     </div>
   );
 }
