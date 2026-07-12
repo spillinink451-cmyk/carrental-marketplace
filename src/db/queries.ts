@@ -118,6 +118,7 @@ export async function getBookingById(id: string) {
       carBrand: carBrands.name, carModel: carModels.name, companyName: companies.name,
       locationCity: cities.name, locationAddress: branches.address,
       currency: companies.currency, idDocumentLabel: countries.idDocumentLabel,
+      timezone: cities.timezone,
     })
     .from(bookings)
     .innerJoin(cars, eq(bookings.carId, cars.id))
@@ -147,36 +148,33 @@ export async function getCarsByCompany(companyId: string) {
 export async function getBookingsByCompany(companyId: string) {
   return db
     .select({
-      id: bookings.id,
-      pickupAt: bookings.pickupAt,
-      dropoffAt: bookings.dropoffAt,
-      status: bookings.status,
-      carBrand: carBrands.name,
-      carModel: carModels.name,
+      id: bookings.id, pickupAt: bookings.pickupAt, dropoffAt: bookings.dropoffAt, status: bookings.status,
+      carBrand: carBrands.name, carModel: carModels.name,
+      timezone: cities.timezone,
     })
     .from(bookings)
     .innerJoin(cars, eq(bookings.carId, cars.id))
     .innerJoin(carBrands, eq(cars.brandId, carBrands.id))
     .innerJoin(carModels, eq(cars.modelId, carModels.id))
+    .innerJoin(branches, eq(bookings.pickupBranchId, branches.id))
+    .innerJoin(cities, eq(branches.cityId, cities.id))
     .where(eq(bookings.companyId, companyId));
 }
 
 export async function getBookingsForUser(userId: string) {
   return db
     .select({
-      id: bookings.id,
-      pickupAt: bookings.pickupAt,
-      dropoffAt: bookings.dropoffAt,
-      status: bookings.status,
-      carBrand: carBrands.name,
-      carModel: carModels.name,
-      companyName: companies.name,
+      id: bookings.id, pickupAt: bookings.pickupAt, dropoffAt: bookings.dropoffAt, status: bookings.status,
+      carBrand: carBrands.name, carModel: carModels.name, companyName: companies.name,
+      timezone: cities.timezone,
     })
     .from(bookings)
     .innerJoin(cars, eq(bookings.carId, cars.id))
     .innerJoin(carBrands, eq(cars.brandId, carBrands.id))
     .innerJoin(carModels, eq(cars.modelId, carModels.id))
     .innerJoin(companies, eq(bookings.companyId, companies.id))
+    .innerJoin(branches, eq(bookings.pickupBranchId, branches.id))
+    .innerJoin(cities, eq(branches.cityId, cities.id))
     .where(eq(bookings.userId, userId));
 }
 
@@ -205,6 +203,15 @@ export async function getBranchesForCompany(companyId: string) {
     .from(branches)
     .innerJoin(cities, eq(branches.cityId, cities.id))
     .where(eq(branches.companyId, companyId));
+}
+
+export async function getBranchTimezone(branchId: string): Promise<string> {
+  const [row] = await db
+    .select({ timezone: cities.timezone })
+    .from(branches)
+    .innerJoin(cities, eq(branches.cityId, cities.id))
+    .where(eq(branches.id, branchId));
+  return row?.timezone ?? "UTC";
 }
 
 export async function getBranchAdmins(companyId: string) {
@@ -244,11 +251,17 @@ export async function getCarsByBranch(branchId: string) {
 
 export async function getBookingsByBranch(branchId: string) {
   return db
-    .select({ id: bookings.id, pickupAt: bookings.pickupAt, dropoffAt: bookings.dropoffAt, status: bookings.status, carBrand: carBrands.name, carModel: carModels.name })
+    .select({
+      id: bookings.id, pickupAt: bookings.pickupAt, dropoffAt: bookings.dropoffAt, status: bookings.status,
+      carBrand: carBrands.name, carModel: carModels.name,
+      timezone: cities.timezone,
+    })
     .from(bookings)
     .innerJoin(cars, eq(bookings.carId, cars.id))
     .innerJoin(carBrands, eq(cars.brandId, carBrands.id))
     .innerJoin(carModels, eq(cars.modelId, carModels.id))
+    .innerJoin(branches, eq(bookings.pickupBranchId, branches.id))
+    .innerJoin(cities, eq(branches.cityId, cities.id))
     .where(eq(bookings.pickupBranchId, branchId));
 }
 

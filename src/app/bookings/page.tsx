@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { getBookingsForUser } from "@/db/queries";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { formatDate } from "@/lib/datetime";
 
 const statusStyles: Record<string, string> = {
   pending: "text-amber-700 bg-amber-50",
@@ -40,7 +41,8 @@ export default async function MyBookingsPage() {
             </div>
             <p className="text-slate-500 text-sm">{b.companyName}</p>
             <p className="text-slate-400 text-xs mt-1">
-              {new Date(b.pickupAt).toLocaleDateString()} → {new Date(b.dropoffAt).toLocaleDateString()}
+              // replace with:
+{formatDate(b.pickupAt, b.timezone)} → {formatDate(b.dropoffAt, b.timezone)}
             </p>
           </Link>
         ))}

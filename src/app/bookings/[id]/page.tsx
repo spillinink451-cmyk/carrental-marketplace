@@ -3,6 +3,7 @@ import { getBookingById, getLeaseByBookingId } from "@/db/queries";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { formatCurrency } from "@/lib/currency";
+import { formatDate, formatDateTime } from "@/lib/datetime";
 
 export default async function BookingConfirmationPage({
   params,
@@ -63,11 +64,11 @@ export default async function BookingConfirmationPage({
         <div className="grid grid-cols-2 gap-4 text-sm mb-6">
           <div>
             <span className="text-slate-400 text-xs block">Pickup</span>
-            {new Date(booking.pickupAt).toLocaleString()}
+            {formatDateTime(booking.pickupAt, booking.timezone)}
           </div>
           <div>
             <span className="text-slate-400 text-xs block">Drop-off</span>
-            {new Date(booking.dropoffAt).toLocaleString()}
+            {formatDateTime(booking.dropoffAt, booking.timezone)}
           </div>
         </div>
 

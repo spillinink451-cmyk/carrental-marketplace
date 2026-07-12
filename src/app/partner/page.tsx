@@ -2,6 +2,7 @@ import { requirePartnerCompany } from "@/lib/partner-auth";
 import { getCarsByCompany, getBookingsByCompany, getCarsByBranch, getBookingsByBranch } from "@/db/queries";
 import Link from "next/link";
 import PartnerNav from "@/components/PartnerNav";
+import { formatDate } from "@/lib/datetime";
 
 const statusStyles: Record<string, string> = {
   pending: "text-amber-700 bg-amber-50",
@@ -73,7 +74,7 @@ export default async function PartnerDashboard() {
               <div>
                 <div className="font-semibold text-slate-800">{b.carBrand} {b.carModel}</div>
                 <div className="text-slate-500 text-sm">
-                  {new Date(b.pickupAt).toLocaleDateString()} → {new Date(b.dropoffAt).toLocaleDateString()}
+                  {formatDate(b.pickupAt, b.timezone)} → {formatDate(b.dropoffAt, b.timezone)}
                 </div>
               </div>
               <span className={`text-xs uppercase font-semibold px-2.5 py-1 rounded-full ${statusStyles[b.status] ?? "text-slate-600 bg-slate-100"}`}>
