@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="col-span-2 sm:col-span-1">
           <span className="text-white font-bold text-xl">Waypoint</span>
           <p className="text-sm text-slate-400 mt-3 leading-relaxed">
-            Book cars from trusted local rental companies across Pakistan.
+            Book cars from trusted local rental companies across different locations.
           </p>
         </div>
 

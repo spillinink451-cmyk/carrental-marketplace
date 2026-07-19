@@ -17,6 +17,17 @@
   --color-brand-dark: var(--brand-dark);
   --color-canvas: var(--canvas);
   --font-sans: var(--font-inter-raw);
+  --font-arabic: var(--font-arabic-raw);
+}
+
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee-scroll 25s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
 }
 
 body {

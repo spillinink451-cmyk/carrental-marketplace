@@ -1,6 +1,6 @@
 import { db } from "./index";
 import { cars, companies, branches, bookings, blockedDates, handoverChecks, disputes, users, companyUsers, countries, carBrands, carModels, carCategories, cities, leaseAgreements, leaseTemplates } from "./schema";
-import { and, eq, notInArray, lt, gt, ne, type SQL, desc } from "drizzle-orm";
+import { and, eq, notInArray, lt, gt, ne, type SQL, desc, sql } from "drizzle-orm";
 
 
 import { asc } from "drizzle-orm";
@@ -39,6 +39,73 @@ export async function getBlockedDates(carId: string) {
     .from(blockedDates)
     .where(eq(blockedDates.carId, carId))
     .orderBy(asc(blockedDates.startDate));
+}
+
+export async function getHomepageStats() {
+  const [carCount] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(cars)
+    .innerJoin(companies, eq(cars.companyId, companies.id))
+    .where(and(eq(cars.isActive, true), eq(companies.status, "active")));
+
+  const [companyCount] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(companies)
+    .where(eq(companies.status, "active"));
+
+  const [cityCount] = await db
+    .select({ count: sql<number>`count(distinct ${branches.cityId})::int` })
+    .from(branches)
+    .innerJoin(companies, eq(branches.companyId, companies.id))
+    .where(eq(companies.status, "active"));
+
+  return { cars: carCount?.count ?? 0, companies: companyCount?.count ?? 0, cities: cityCount?.count ?? 0 };
+}
+
+export async function getCategoryStats() {
+  const categoriesList = await db.select().from(carCategories);
+  const counts = await db
+    .select({ categoryId: cars.categoryId, count: sql<number>`count(*)::int` })
+    .from(cars)
+    .innerJoin(companies, eq(cars.companyId, companies.id))
+    .where(and(eq(cars.isActive, true), eq(companies.status, "active")))
+    .groupBy(cars.categoryId);
+
+  return categoriesList.map((cat) => ({
+    id: cat.id,
+    name: cat.name,
+    count: counts.find((c) => c.categoryId === cat.id)?.count ?? 0,
+  }));
+}
+
+export async function getCityStats() {
+  const rows = await db
+    .select({
+      city: cities.name,
+      country: countries.name,
+      carCount: sql<number>`count(${cars.id})::int`,
+    })
+    .from(cities)
+    .innerJoin(branches, eq(branches.cityId, cities.id))
+    .innerJoin(companies, eq(branches.companyId, companies.id))
+    .innerJoin(countries, eq(cities.countryCode, countries.code))
+    .leftJoin(cars, and(eq(cars.branchId, branches.id), eq(cars.isActive, true)))
+    .where(eq(companies.status, "active"))
+    .groupBy(cities.name, countries.name);
+
+  // Sorted in JS rather than in the query itself — simpler and safer than
+  // an aggregate ORDER BY across a grouped query.
+  return rows.sort((a, b) => b.carCount - a.carCount);
+}
+
+export async function getActiveBrandNames() {
+  const rows = await db
+    .selectDistinct({ brand: carBrands.name })
+    .from(cars)
+    .innerJoin(carBrands, eq(cars.brandId, carBrands.id))
+    .innerJoin(companies, eq(cars.companyId, companies.id))
+    .where(and(eq(cars.isActive, true), eq(companies.status, "active")));
+  return rows.map((r) => r.brand);
 }
 
 export async function getActiveCars(filters: CarFilters = {}) {

@@ -9,6 +9,7 @@ const nextConfig: NextConfig = {
     "192.168.0.104",
     "192.168.0.101",
   ],
+  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "pub-266c7eeb588c418dbbf4968670b17226.r2.dev" },

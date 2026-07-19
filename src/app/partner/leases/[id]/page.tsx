@@ -7,6 +7,10 @@ import { signLeaseAsCompany, captureWalkInCustomerSignature } from "@/app/action
 import PartnerNav from "@/components/PartnerNav";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate, formatDateTime } from "@/lib/datetime";
+import LeaseDetailsForm from "@/components/LeaseDetailsForm";
+
+
+export const maxDuration = 30;
 
 export default async function PartnerLeasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -38,6 +42,16 @@ export default async function PartnerLeasePage({ params }: { params: Promise<{ i
         </div>
 
         <div className="border-t border-gray-100 pt-4 mb-6">
+          <h2 className="font-semibold text-slate-800 mb-3">Vehicle &amp; Renter Details</h2>
+          <LeaseDetailsForm lease={lease} />
+        </div>
+        {lease.termsAndConditionsAr && (
+  <div dir="rtl" className="font-arabic text-sm text-slate-600 whitespace-pre-wrap mt-4 pt-4 border-t border-gray-100 text-right">
+    {lease.termsAndConditionsAr}
+  </div>
+)}
+
+        <div className="border-t border-gray-100 pt-4 mb-6">
           <h2 className="font-semibold text-slate-800 mb-3">Company signature</h2>
           {lease.companySignatureUrl ? (
             <p className="text-sm text-emerald-600">✓ Company signed on ${formatDateTime(lease.companySignedAt!, lease.timezone)}</p>
@@ -60,6 +74,12 @@ export default async function PartnerLeasePage({ params }: { params: Promise<{ i
         {lease.status === "active" && (
           <a href={`/api/leases/${lease.id}/pdf`} className="text-brand text-sm font-medium underline">Download signed PDF</a>
         )}
+
+        {lease.bookingId && (
+  <a href={`/partner/bookings/${lease.bookingId}`} className="text-xs text-brand underline block mt-1">
+    View linked booking →
+  </a>
+)}
       </div>
     </main>
   );

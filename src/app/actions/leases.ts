@@ -7,16 +7,13 @@ import { eq, desc } from "drizzle-orm";
 import { encrypt, decrypt } from "@/lib/encryption";
 import { requireBranchAccess } from "@/lib/partner-auth";
 import { uploadLeaseDocument } from "@/lib/r2";
-import { generateLeasePDF } from "@/lib/lease-pdf";
+import { generateLeasePdfViaChromium } from "@/lib/lease-pdf-render";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { DEFAULT_TERMS_EN, DEFAULT_TERMS_AR } from "@/lib/default-lease-terms";
 
-;
 
-const DEFAULT_TERMS =
-  "The lessee agrees to return the vehicle in the condition it was received, subject to normal wear and tear. " +
-  "Any damage beyond normal wear will be assessed against the security deposit. The lessee is responsible for all " +
-  "traffic violations incurred during the lease period. The lessor reserves the right to inspect the vehicle at pickup and return.";
+
 
 async function getDefaultTemplate(companyId: string) {
   const [template] = await db.select().from(leaseTemplates).where(eq(leaseTemplates.companyId, companyId)).orderBy(desc(leaseTemplates.createdAt)).limit(1);
@@ -54,7 +51,9 @@ export async function createLeaseFromBooking(bookingId: string) {
     startDate: booking.pickupAt, endDate: booking.dropoffAt,
     pricePerDay: car.pricePerDay, totalAmount, depositAmount: booking.depositAmount,
     mileageLimitKm: template?.mileageLimitKm, fuelPolicy: template?.fuelPolicy ?? "Return with the same fuel level as at pickup.",
-    lateFeePerDay: template?.lateFeePerDay, termsAndConditions: template?.termsAndConditions ?? DEFAULT_TERMS,
+    lateFeePerDay: template?.lateFeePerDay,
+    termsAndConditions: template?.termsAndConditions ?? DEFAULT_TERMS_EN,
+    termsAndConditionsAr: template?.termsAndConditionsAr ?? DEFAULT_TERMS_AR,
     createdByUserId: booking.userId, status: "draft",
   }).returning();
 
@@ -102,7 +101,9 @@ export async function createStandaloneLease(input: {
     startDate: new Date(input.startDate), endDate: new Date(input.endDate),
     pricePerDay: input.pricePerDay, totalAmount: input.totalAmount, depositAmount: input.depositAmount,
     mileageLimitKm: template?.mileageLimitKm, fuelPolicy: template?.fuelPolicy ?? "Return with the same fuel level as at pickup.",
-    lateFeePerDay: template?.lateFeePerDay, termsAndConditions: template?.termsAndConditions ?? DEFAULT_TERMS,
+    lateFeePerDay: template?.lateFeePerDay,
+    termsAndConditions: template?.termsAndConditions ?? DEFAULT_TERMS_EN,
+    termsAndConditionsAr: template?.termsAndConditionsAr ?? DEFAULT_TERMS_AR,
     createdByUserId: session.user.id, status: "draft",
   }).returning();
 
@@ -126,25 +127,28 @@ async function finalizeIfFullySigned(leaseId: string) {
     .where(eq(branches.id, lease.branchId));
   const timezone = branchInfo?.timezone ?? "UTC";
 
-  const pdfBuffer = await generateLeasePDF({
-    id: lease.id,
-    companyNameSnapshot: lease.companyNameSnapshot, carSnapshot: lease.carSnapshot,
-    lesseeName: lease.lesseeName, lesseePhone: lease.lesseePhone, lesseeCnic: decrypt(lease.lesseeCnicEncrypted),
-    idDocumentLabel: company?.idDocumentLabel ?? "ID Number",
-    startDate: lease.startDate, endDate: lease.endDate,
-    pricePerDay: lease.pricePerDay, totalAmount: lease.totalAmount, depositAmount: lease.depositAmount,
-    mileageLimitKm: lease.mileageLimitKm, fuelPolicy: lease.fuelPolicy, lateFeePerDay: lease.lateFeePerDay,
-    termsAndConditions: lease.termsAndConditions,
-    currency: company?.currency ?? "PKR",
-    timezone,
-    customerSignatureUrl: lease.customerSignatureUrl, customerSignedAt: lease.customerSignedAt!,
-    companySignatureUrl: lease.companySignatureUrl, companySignedAt: lease.companySignedAt!,
-  });
+  const pdfBuffer = await generateLeasePdfViaChromium({
+  id: lease.id,
+  companyNameSnapshot: lease.companyNameSnapshot, carSnapshot: lease.carSnapshot,
+  lesseeName: lease.lesseeName, lesseePhone: lease.lesseePhone, lesseeCnic: decrypt(lease.lesseeCnicEncrypted),
+  idDocumentLabel: company?.idDocumentLabel ?? "ID Number",
+  lesseeNationality: lease.lesseeNationality, lesseeAddress: lease.lesseeAddress, lesseeWorkAddress: lease.lesseeWorkAddress,
+  licenseType: lease.licenseType, drivingLicenseNo: lease.drivingLicenseNo,
+  plateNo: lease.plateNo, carColor: lease.carColor, kmOut: lease.kmOut, kmIn: lease.kmIn,
+  radioCassette: lease.radioCassette, airCondition: lease.airCondition, insuranceCoverage: lease.insuranceCoverage,
+  startDate: lease.startDate, endDate: lease.endDate,
+  pricePerDay: lease.pricePerDay, totalAmount: lease.totalAmount, depositAmount: lease.depositAmount,
+  mileageLimitKm: lease.mileageLimitKm, fuelPolicy: lease.fuelPolicy, lateFeePerDay: lease.lateFeePerDay,
+  termsAndConditions: lease.termsAndConditions, termsAndConditionsAr: lease.termsAndConditionsAr,
+  currency: company?.currency ?? "PKR",
+  timezone,
+  customerSignatureUrl: lease.customerSignatureUrl, customerSignedAt: lease.customerSignedAt!,
+  companySignatureUrl: lease.companySignatureUrl, companySignedAt: lease.companySignedAt!,
+});
 
   const pdfKey = await uploadLeaseDocument(`${lease.id}.pdf`, pdfBuffer, "application/pdf");
   await db.update(leaseAgreements).set({ status: "active", pdfUrl: pdfKey }).where(eq(leaseAgreements.id, leaseId));
 }
-
 
 export async function signLeaseAsCustomer(leaseId: string, signatureUrl: string) {
   const session = await auth();

@@ -9,6 +9,7 @@ import { revalidatePath } from "next/cache";
 export async function saveLeaseTemplate(input: {
   name: string;
   termsAndConditions: string;
+  termsAndConditionsAr?: string;
   mileageLimitKm?: number;
   fuelPolicy: string;
   lateFeePerDay?: string;
@@ -32,6 +33,7 @@ export async function saveLeaseTemplate(input: {
     mileageLimitKm: input.mileageLimitKm,
     fuelPolicy: input.fuelPolicy.trim(),
     lateFeePerDay: input.lateFeePerDay,
+    termsAndConditionsAr: input.termsAndConditionsAr?.trim(),
   };
 
   if (existing) {

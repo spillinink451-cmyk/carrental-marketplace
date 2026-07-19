@@ -224,6 +224,8 @@ async function drawSignatureBlock(doc: LeaseDocument, opts: {
 }
 
 export async function generateLeasePDF(lease: {
+ lesseeNationality: string | null; drivingLicenseNo: string | null; plateNo: string | null; carColor: string | null;
+kmOut: number | null; kmIn: number | null; radioCassette: boolean; airCondition: boolean; insuranceCoverage: string | null;
   id: string;
   companyNameSnapshot: string; carSnapshot: string;
   lesseeName: string; lesseePhone: string; lesseeCnic: string; idDocumentLabel: string;
@@ -255,6 +257,19 @@ export async function generateLeasePDF(lease: {
     { label: "Lease End", value: formatDate(lease.endDate, lease.timezone) },
   ]);
   doc.spacer(10);
+
+  doc.sectionHeading("Vehicle & Renter Details");
+doc.twoColumnFields([
+  { label: "Nationality", value: lease.lesseeNationality ?? "—" },
+  { label: "Driving License No.", value: lease.drivingLicenseNo ?? "—" },
+  { label: "Plate No.", value: lease.plateNo ?? "—" },
+  { label: "Color", value: lease.carColor ?? "—" },
+  { label: "KM Out", value: lease.kmOut != null ? `${lease.kmOut} km` : "—" },
+  { label: "KM In", value: lease.kmIn != null ? `${lease.kmIn} km` : "—" },
+  { label: "Insurance", value: lease.insuranceCoverage ?? "—" },
+  { label: "Radio / A/C", value: `${lease.radioCassette ? "Yes" : "No"} / ${lease.airCondition ? "Yes" : "No"}` },
+]);
+doc.spacer(10);
 
   doc.sectionHeading("Financial Terms");
   const financialFields = [

@@ -103,7 +103,7 @@ export default async function BookingConfirmationPage({
         </div>
 
         <p className="text-xs text-slate-400 mt-4">
-          Free cancellation until {new Date(booking.cancellationDeadline).toLocaleString()}
+          Free cancellation until {formatDateTime(booking.cancellationDeadline, booking.timezone)}
         </p>
 
         <Link href={`/bookings/${booking.id}/dispute`} className="text-sm text-red-500 underline block mt-4">

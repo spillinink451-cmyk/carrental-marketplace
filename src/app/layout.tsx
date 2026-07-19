@@ -6,6 +6,13 @@ import Nav from "@/components/Nav";
 import Footer from "@/components/Footer";
 import { auth } from "@/auth";
 import { getPartnerLinkForUser } from "@/db/queries";
+import { Noto_Sans_Arabic } from "next/font/google";
+
+const notoArabic = Noto_Sans_Arabic({
+  variable: "--font-arabic-raw",
+  subsets: ["arabic"],
+  weight: ["400", "600", "700"],
+});
 
 const inter = Inter({
   variable: "--font-inter-raw",

@@ -197,10 +197,13 @@ export const leaseTemplates = pgTable("lease_templates", {
   companyId: uuid("company_id").notNull().references(() => companies.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
   termsAndConditions: text("terms_and_conditions").notNull(),
+  termsAndConditionsAr: text("terms_and_conditions_ar"),
   mileageLimitKm: integer("mileage_limit_km"),
+  
   fuelPolicy: text("fuel_policy").notNull().default("Return with the same fuel level as at pickup."),
   lateFeePerDay: numeric("late_fee_per_day", { precision: 10, scale: 2 }),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+
 });
 
 
@@ -275,6 +278,20 @@ export const leaseAgreements = pgTable("lease_agreements", {
   lesseeUserId: uuid("lessee_user_id").references(() => users.id),
   lesseeName: text("lessee_name").notNull(),
   lesseePhone: text("lessee_phone").notNull(),
+  termsAndConditionsAr: text("terms_and_conditions_ar"),
+lesseeNationality: text("lessee_nationality"),
+lesseeAddress: text("lessee_address"),
+lesseeWorkAddress: text("lessee_work_address"),
+licenseType: text("license_type"),
+licenseIssueDate: timestamp("license_issue_date"),
+drivingLicenseNo: text("driving_license_no"),
+plateNo: text("plate_no"),
+carColor: text("car_color"),
+kmOut: integer("km_out"),
+kmIn: integer("km_in"),
+radioCassette: boolean("radio_cassette").notNull().default(false),
+airCondition: boolean("air_condition").notNull().default(true),
+insuranceCoverage: text("insurance_coverage").default("Full coverage"),
   lesseeCnicEncrypted: text("lessee_cnic_encrypted").notNull(),
   lesseeEmail: text("lessee_email"),
   carSnapshot: text("car_snapshot").notNull(),

@@ -7,6 +7,9 @@ import { signLeaseAsCustomer } from "@/app/actions/leases";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate, formatDateTime } from "@/lib/datetime";
 
+
+export const maxDuration = 30;
+
 export default async function CustomerLeasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const session = await auth();
@@ -41,6 +44,11 @@ export default async function CustomerLeasePage({ params }: { params: Promise<{ 
           <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Terms & Conditions</h2>
           <p className="text-sm text-slate-600 whitespace-pre-wrap">{lease.termsAndConditions}</p>
         </div>
+        {lease.termsAndConditionsAr && (
+        <div dir="rtl" className="font-arabic text-sm text-slate-600 whitespace-pre-wrap mt-4 pt-4 border-t border-gray-100 text-right">
+          {lease.termsAndConditionsAr}
+        </div>
+      )}
 
         <div className="border-t border-gray-100 pt-4 mb-4">
           <h2 className="font-semibold text-slate-800 mb-3">Your signature</h2>
