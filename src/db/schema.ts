@@ -49,12 +49,9 @@ export const users = pgTable("users", {
   image: text("image"),
   passwordHash: text("password_hash"),
   phone: text("phone"),
-cnicEncrypted: text("cnic_encrypted"),
-nationality: text("nationality"),
-address: text("address"),
-licenseType: text("license_type"),
-licenseNo: text("license_no"),
-licenseIssueDate: timestamp("license_issue_date"),
+  cnicEncrypted: text("cnic_encrypted"),
+
+
 });
 
 export const accounts = pgTable(
