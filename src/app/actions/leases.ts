@@ -59,6 +59,7 @@ export async function createLeaseFromBooking(bookingId: string) {
     lesseeAddress: booking.driverAddress,
     licenseType: booking.driverLicenseType,
     drivingLicenseNo: booking.driverLicenseNo,
+    licenseIssueDate: booking.driverLicenseIssueDate,
   }).returning();
 
   return lease;
