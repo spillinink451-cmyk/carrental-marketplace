@@ -49,10 +49,10 @@ export default function PriceBreakdown({
   const [driverPhone, setDriverPhone] = useState(initialDriverPhone);
   const [driverCnic, setDriverCnic] = useState(initialDriverCnic);
   const [driverNationality, setDriverNationality] = useState(initialDriverNationality);
-const [driverAddress, setDriverAddress] = useState(initialDriverAddress);
-const [driverLicenseType, setDriverLicenseType] = useState(initialDriverLicenseType);
-const [driverLicenseNo, setDriverLicenseNo] = useState(initialDriverLicenseNo);
-const [driverLicenseIssueDate, setDriverLicenseIssueDate] = useState(initialDriverLicenseIssueDate);
+  const [driverAddress, setDriverAddress] = useState(initialDriverAddress);
+  const [driverLicenseType, setDriverLicenseType] = useState(initialDriverLicenseType);
+  const [driverLicenseNo, setDriverLicenseNo] = useState(initialDriverLicenseNo);
+  const [driverLicenseIssueDate, setDriverLicenseIssueDate] = useState(initialDriverLicenseIssueDate);
 
   const days = useMemo(() => {
     if (!pickup || !dropoff) return 0;

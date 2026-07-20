@@ -50,6 +50,11 @@ export const users = pgTable("users", {
   passwordHash: text("password_hash"),
   phone: text("phone"),
   cnicEncrypted: text("cnic_encrypted"),
+  nationality: text("nationality"),
+  address: text("address"),
+  licenseType: text("license_type"),
+  licenseNo: text("license_no"),
+  licenseIssueDate: timestamp("license_issue_date"),
 
 
 });
@@ -248,13 +253,13 @@ dropoffBranchId: uuid("dropoff_branch_id").notNull().references(() => branches.i
   pickupAt: timestamp("pickup_at").notNull(),
   dropoffAt: timestamp("dropoff_at").notNull(),
   driverName: text("driver_name").notNull(),
-driverPhone: text("driver_phone").notNull(),
-driverCnic: text("driver_cnic").notNull(),
-driverNationality: text("driver_nationality"),
-driverAddress: text("driver_address"),
-driverLicenseType: text("driver_license_type"),
-driverLicenseNo: text("driver_license_no"),
-driverLicenseIssueDate: timestamp("driver_license_issue_date"),
+  driverPhone: text("driver_phone").notNull(),
+  driverCnic: text("driver_cnic").notNull(),
+  driverNationality: text("driver_nationality"),
+  driverAddress: text("driver_address"),
+  driverLicenseType: text("driver_license_type"),
+  driverLicenseNo: text("driver_license_no"),
+  driverLicenseIssueDate: timestamp("driver_license_issue_date"),
   depositAmount: numeric("deposit_amount", { precision: 10, scale: 2 }).notNull(),
   remainingAmount: numeric("remaining_amount", { precision: 10, scale: 2 }).notNull(),
   platformFee: numeric("platform_fee", { precision: 10, scale: 2 })
