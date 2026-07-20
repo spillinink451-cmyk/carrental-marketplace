@@ -9,7 +9,7 @@ const nextConfig: NextConfig = {
     "192.168.0.104",
     "192.168.0.101",
   ],
-serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core", "puppeteer"], 
+serverExternalPackages: ["@sparticuz/chromium-min", "puppeteer-core", "puppeteer"], 
  outputFileTracingIncludes: {
     "/leases/[id]": ["./public/fonts/**"],
     "/partner/leases/[id]": ["./public/fonts/**"],

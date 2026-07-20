@@ -1,7 +1,5 @@
 import fs from "fs";
 import path from "path";
-import chromium from "@sparticuz/chromium";
-import puppeteer from "puppeteer-core";
 import { buildLeaseHtml } from "./lease-html-template";
 import { getSignatureReadUrl } from "@/lib/r2";
 
@@ -11,6 +9,28 @@ function getFontBase64() {
   const fontPath = path.join(process.cwd(), "public/fonts/NotoSansArabic-Variable.ttf");
   cachedFontBase64 = fs.readFileSync(fontPath).toString("base64");
   return cachedFontBase64;
+}
+
+async function launchBrowser() {
+  if (process.env.VERCEL) {
+    // Production — Vercel's serverless functions run on Linux x64.
+    // chromium-min doesn't bundle the binary; it downloads it from this
+    // URL on cold start instead, which is what actually fixes the
+    // "bin directory not found" tracing error we hit with the full package.
+    const { default: chromium } = await import("@sparticuz/chromium-min");
+    const puppeteer = await import("puppeteer-core");
+    return puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath(
+        "https://github.com/Sparticuz/chromium/releases/download/v149.0.0/chromium-v149.0.0-pack.x64.tar"
+      ),
+      headless: true,
+    });
+  }
+
+  // Local dev — full puppeteer's own bundled Chromium for your OS (Windows).
+  const puppeteer = await import("puppeteer");
+  return puppeteer.launch({ headless: true });
 }
 
 export async function generateLeasePdfViaChromium(lease: Parameters<typeof buildLeaseHtml>[0]): Promise<Buffer> {
@@ -28,11 +48,7 @@ export async function generateLeasePdfViaChromium(lease: Parameters<typeof build
     getFontBase64()
   );
 
-  const browser = await puppeteer.launch({
-    args: chromium.args,
-    executablePath: await chromium.executablePath(),
-    headless: true,
-  });
+  const browser = await launchBrowser();
 
   try {
     const page = await browser.newPage();

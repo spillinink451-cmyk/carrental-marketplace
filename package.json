@@ -15,7 +15,7 @@
     "@aws-sdk/s3-request-presigner": "^3.1077.0",
     "@neondatabase/serverless": "^1.1.0",
     "@react-google-maps/api": "^2.20.8",
-    "@sparticuz/chromium": "^149.0.0",
+    "@sparticuz/chromium-min": "^149.0.0",
     "@upstash/ratelimit": "^2.0.8",
     "@upstash/redis": "^1.38.0",
     "bcryptjs": "^3.0.3",
@@ -42,6 +42,7 @@
     "drizzle-kit": "^0.31.10",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "puppeteer": "^25.3.0",
     "tailwindcss": "^4",
     "tsx": "^4.22.4",
     "typescript": "^5"
