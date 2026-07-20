@@ -46,6 +46,10 @@ export async function createLeaseFromBooking(bookingId: string) {
     templateId: template?.id, lesseeUserId: booking.userId,
     lesseeName: booking.driverName, lesseePhone: booking.driverPhone,
     lesseeCnicEncrypted: booking.driverCnic, // already encrypted with the same key — copy directly, no decrypt/re-encrypt
+    lesseeNationality: booking.driverNationality,
+    lesseeAddress: booking.driverAddress,
+    licenseType: booking.driverLicenseType,
+    drivingLicenseNo: booking.driverLicenseNo,
     lesseeEmail: lessee?.email,
     carSnapshot: `${car.brand} ${car.model}`, companyNameSnapshot: company?.name ?? "",
     startDate: booking.pickupAt, endDate: booking.dropoffAt,

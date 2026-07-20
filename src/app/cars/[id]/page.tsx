@@ -138,6 +138,11 @@ const profile = session?.user?.id ? await getUserProfile(session.user.id) : null
               initialDriverName={profile?.name ?? session?.user?.name ?? ""}
               initialDriverPhone={profile?.phone ?? ""}
               initialDriverCnic={profile?.cnic ?? ""}
+              initialDriverNationality={profile?.nationality ?? ""}
+              initialDriverAddress={profile?.address ?? ""}
+              initialDriverLicenseType={profile?.licenseType ?? ""}
+              initialDriverLicenseNo={profile?.licenseNo ?? ""}
+              initialDriverLicenseIssueDate={profile?.licenseIssueDate ? new Date(profile.licenseIssueDate).toISOString().split("T")[0] : ""}
             />
           </div>
         </div>

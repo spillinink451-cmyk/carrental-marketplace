@@ -39,7 +39,7 @@ const partnerLink = session?.user?.id ? await getPartnerLinkForUser(session.user
 
 
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased`}>
+    <html lang="en" className={`${inter.variable} ${notoArabic.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-canvas text-slate-800">
         <Providers>
           <Nav partnerRole={partnerLink?.role ?? null} />

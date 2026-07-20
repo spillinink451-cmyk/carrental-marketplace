@@ -18,6 +18,11 @@ export default function PriceBreakdown({
   initialDriverName = "",
   initialDriverPhone = "",
   initialDriverCnic = "",
+  initialDriverNationality = "",
+  initialDriverAddress = "",
+  initialDriverLicenseType = "",
+  initialDriverLicenseNo = "",
+  initialDriverLicenseIssueDate = "",
 }: {
   carId: string;
   pricePerDay: number;
@@ -28,6 +33,11 @@ export default function PriceBreakdown({
   initialDriverName?: string;
   initialDriverPhone?: string;
   initialDriverCnic?: string;
+  initialDriverNationality?: string;
+  initialDriverAddress?: string;
+  initialDriverLicenseType?: string;
+  initialDriverLicenseNo?: string;
+  initialDriverLicenseIssueDate?: string;
 }) {
   const { status } = useSession();
   const router = useRouter();
@@ -38,6 +48,11 @@ export default function PriceBreakdown({
   const [driverName, setDriverName] = useState(initialDriverName);
   const [driverPhone, setDriverPhone] = useState(initialDriverPhone);
   const [driverCnic, setDriverCnic] = useState(initialDriverCnic);
+  const [driverNationality, setDriverNationality] = useState(initialDriverNationality);
+const [driverAddress, setDriverAddress] = useState(initialDriverAddress);
+const [driverLicenseType, setDriverLicenseType] = useState(initialDriverLicenseType);
+const [driverLicenseNo, setDriverLicenseNo] = useState(initialDriverLicenseNo);
+const [driverLicenseIssueDate, setDriverLicenseIssueDate] = useState(initialDriverLicenseIssueDate);
 
   const days = useMemo(() => {
     if (!pickup || !dropoff) return 0;
@@ -64,6 +79,11 @@ export default function PriceBreakdown({
         driverName,
         driverPhone,
         driverCnic,
+        driverNationality,
+        driverAddress, 
+        driverLicenseType, 
+        driverLicenseNo, 
+        driverLicenseIssueDate,
       });
       if (result?.error) setError(result.error);
     });
@@ -131,6 +151,33 @@ export default function PriceBreakdown({
               <input value={driverCnic} onChange={(e) => setDriverCnic(e.target.value)}
                 className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" placeholder="e.g. xxxxx-xxxxxxx-x" />
             </div>
+            <div>
+  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Nationality</label>
+  <input value={driverNationality} onChange={(e) => setDriverNationality(e.target.value)}
+    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" required />
+</div>
+<div>
+  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Current address</label>
+  <input value={driverAddress} onChange={(e) => setDriverAddress(e.target.value)}
+    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" required />
+</div>
+<div className="grid grid-cols-2 gap-3">
+  <div>
+    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">License type</label>
+    <input value={driverLicenseType} onChange={(e) => setDriverLicenseType(e.target.value)}
+      className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" placeholder="e.g. Light Vehicle" required />
+  </div>
+  <div>
+    <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">License no.</label>
+    <input value={driverLicenseNo} onChange={(e) => setDriverLicenseNo(e.target.value)}
+      className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" required />
+  </div>
+</div>
+<div>
+  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">License date of issue</label>
+  <input type="date" value={driverLicenseIssueDate} onChange={(e) => setDriverLicenseIssueDate(e.target.value)}
+    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" required />
+</div>
           </div>
 
           <button onClick={handleReserve} disabled={isPending}

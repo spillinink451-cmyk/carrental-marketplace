@@ -25,6 +25,11 @@ export async function getUserProfile(userId: string) {
     name: user.name,
     phone: user.phone,
     cnic: user.cnicEncrypted ? decrypt(user.cnicEncrypted) : null,
+    nationality: user.nationality,
+    address: user.address,
+    licenseType: user.licenseType,
+    licenseNo: user.licenseNo,
+    licenseIssueDate: user.licenseIssueDate,
   };
 }
 

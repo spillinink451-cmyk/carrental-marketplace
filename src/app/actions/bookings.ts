@@ -8,7 +8,6 @@ import { redirect } from "next/navigation";
 import { PLATFORM_FEE } from "@/lib/constants";
 import { encrypt } from "@/lib/encryption";
 
-
 export async function createBooking(input: {
   carId: string;
   pickupAt: string;
@@ -16,14 +15,23 @@ export async function createBooking(input: {
   driverName: string;
   driverPhone: string;
   driverCnic: string;
+  driverNationality: string;
+  driverAddress: string;
+  driverLicenseType: string;
+  driverLicenseNo: string;
+  driverLicenseIssueDate: string;
 }) {
   const session = await auth();
   if (!session?.user?.id) {
     return { error: "You must be signed in to book." };
   }
 
-  if (!input.driverName?.trim() || !input.driverPhone?.trim() || !input.driverCnic?.trim()) {
-    return { error: "Please fill in all driver details." };
+  if (
+    !input.driverName?.trim() || !input.driverPhone?.trim() || !input.driverCnic?.trim() ||
+    !input.driverNationality?.trim() || !input.driverAddress?.trim() ||
+    !input.driverLicenseType?.trim() || !input.driverLicenseNo?.trim() || !input.driverLicenseIssueDate
+  ) {
+    return { error: "Please fill in all driver and license details." };
   }
 
   const pickup = new Date(input.pickupAt);
@@ -42,8 +50,6 @@ export async function createBooking(input: {
   if (!company || company.status !== "active") {
     return { error: "This company is not currently accepting bookings." };
   }
-
-
 
   // Fast-path check for good UX — catches the common case instantly.
   // This is NOT the actual race-safety guarantee (two simultaneous
@@ -97,8 +103,7 @@ export async function createBooking(input: {
         carId: input.carId,
         companyId: car.companyId,
         pickupBranchId: car.branchId,
-      dropoffBranchId: car.branchId,// one-way branch selection is a future feature, not yet in the UI
- 
+        dropoffBranchId: car.branchId, // one-way branch selection is a future feature, not yet in the UI
         pickupAt: pickup,
         dropoffAt: dropoff,
         depositAmount: depositAmount.toFixed(2),
@@ -107,6 +112,11 @@ export async function createBooking(input: {
         driverName: input.driverName.trim(),
         driverPhone: input.driverPhone.trim(),
         driverCnic: encrypt(input.driverCnic.trim()),
+        driverNationality: input.driverNationality.trim(),
+        driverAddress: input.driverAddress.trim(),
+        driverLicenseType: input.driverLicenseType.trim(),
+        driverLicenseNo: input.driverLicenseNo.trim(),
+        driverLicenseIssueDate: new Date(input.driverLicenseIssueDate),
         status: "pending",
         cancellationDeadline,
       })
@@ -118,14 +128,21 @@ export async function createBooking(input: {
     }
     throw err;
   }
+
+  // Save to profile for next time — non-blocking, a failed save shouldn't break a successful booking.
   try {
-  await db.update(users).set({
-    phone: input.driverPhone.trim(),
-    cnicEncrypted: encrypt(input.driverCnic.trim()),
-  }).where(eq(users.id, session.user.id));
-} catch {
-  // Non-critical — the booking itself already succeeded.
-}
+    await db.update(users).set({
+      phone: input.driverPhone.trim(),
+      cnicEncrypted: encrypt(input.driverCnic.trim()),
+      nationality: input.driverNationality.trim(),
+      address: input.driverAddress.trim(),
+      licenseType: input.driverLicenseType.trim(),
+      licenseNo: input.driverLicenseNo.trim(),
+      licenseIssueDate: new Date(input.driverLicenseIssueDate),
+    }).where(eq(users.id, session.user.id));
+  } catch {
+    // Non-critical — the booking itself already succeeded.
+  }
 
   redirect(`/bookings/${booking.id}`);
 }
