@@ -13,6 +13,8 @@ export async function saveLeaseTemplate(input: {
   mileageLimitKm?: number;
   fuelPolicy: string;
   lateFeePerDay?: string;
+  uncleaningFee?: string;
+  excessMileageRate?: string;
 }) {
   const ctx = await requireCompanyOwner();
 
@@ -30,10 +32,12 @@ export async function saveLeaseTemplate(input: {
   const values = {
     name: input.name.trim(),
     termsAndConditions: input.termsAndConditions.trim(),
+    termsAndConditionsAr: input.termsAndConditionsAr?.trim() || undefined,
     mileageLimitKm: input.mileageLimitKm,
     fuelPolicy: input.fuelPolicy.trim(),
     lateFeePerDay: input.lateFeePerDay,
-    termsAndConditionsAr: input.termsAndConditionsAr?.trim(),
+    uncleaningFee: input.uncleaningFee,
+    excessMileageRate: input.excessMileageRate?.trim() || undefined,
   };
 
   if (existing) {

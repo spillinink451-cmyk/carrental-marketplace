@@ -52,6 +52,8 @@ export async function createLeaseFromBooking(bookingId: string) {
     pricePerDay: car.pricePerDay, totalAmount, depositAmount: booking.depositAmount,
     mileageLimitKm: template?.mileageLimitKm, fuelPolicy: template?.fuelPolicy ?? "Return with the same fuel level as at pickup.",
     lateFeePerDay: template?.lateFeePerDay,
+    uncleaningFee: template?.uncleaningFee,
+    excessMileageRate: template?.excessMileageRate,
     termsAndConditions: template?.termsAndConditions ?? DEFAULT_TERMS_EN,
     termsAndConditionsAr: template?.termsAndConditionsAr ?? DEFAULT_TERMS_AR,
     createdByUserId: booking.userId, status: "draft",
@@ -67,8 +69,15 @@ export async function createLeaseFromBooking(bookingId: string) {
 
 // Flow 2 — standalone, no booking required.
 export async function createStandaloneLease(input: {
-  carId: string; lesseeName: string; lesseePhone: string; lesseeCnic: string; lesseeEmail?: string;
-  startDate: string; endDate: string; pricePerDay: string; totalAmount: string; depositAmount: string;
+  carId: string;
+  lesseeName: string; 
+  lesseePhone: string; 
+  lesseeCnic: string; 
+  lesseeEmail?: string;
+  startDate: string; endDate: string; 
+  pricePerDay: string; 
+  totalAmount: string; 
+  depositAmount: string;
 }) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
@@ -107,6 +116,8 @@ export async function createStandaloneLease(input: {
     pricePerDay: input.pricePerDay, totalAmount: input.totalAmount, depositAmount: input.depositAmount,
     mileageLimitKm: template?.mileageLimitKm, fuelPolicy: template?.fuelPolicy ?? "Return with the same fuel level as at pickup.",
     lateFeePerDay: template?.lateFeePerDay,
+    uncleaningFee: template?.uncleaningFee,
+    excessMileageRate: template?.excessMileageRate,
     termsAndConditions: template?.termsAndConditions ?? DEFAULT_TERMS_EN,
     termsAndConditionsAr: template?.termsAndConditionsAr ?? DEFAULT_TERMS_AR,
     createdByUserId: session.user.id, status: "draft",
@@ -135,12 +146,13 @@ async function finalizeIfFullySigned(leaseId: string) {
   const pdfBuffer = await generateLeasePdfViaChromium({
   id: lease.id,
   companyNameSnapshot: lease.companyNameSnapshot, carSnapshot: lease.carSnapshot,
-  lesseeName: lease.lesseeName, lesseePhone: lease.lesseePhone, lesseeCnic: decrypt(lease.lesseeCnicEncrypted),
-  idDocumentLabel: company?.idDocumentLabel ?? "ID Number",
+  lesseeName: lease.lesseeName, lesseePhone: lease.lesseePhone, lesseeWorkPhone: lease.lesseeWorkPhone,
+  lesseeCnic: decrypt(lease.lesseeCnicEncrypted), idDocumentLabel: company?.idDocumentLabel ?? "ID Number",
   lesseeNationality: lease.lesseeNationality, lesseeAddress: lease.lesseeAddress, lesseeWorkAddress: lease.lesseeWorkAddress,
-  licenseType: lease.licenseType, drivingLicenseNo: lease.drivingLicenseNo,
+  licenseType: lease.licenseType, drivingLicenseNo: lease.drivingLicenseNo, licenseIssueDate: lease.licenseIssueDate,
   plateNo: lease.plateNo, carColor: lease.carColor, kmOut: lease.kmOut, kmIn: lease.kmIn,
   radioCassette: lease.radioCassette, airCondition: lease.airCondition, insuranceCoverage: lease.insuranceCoverage,
+  uncleaningFee: lease.uncleaningFee, excessMileageRate: lease.excessMileageRate,
   startDate: lease.startDate, endDate: lease.endDate,
   pricePerDay: lease.pricePerDay, totalAmount: lease.totalAmount, depositAmount: lease.depositAmount,
   mileageLimitKm: lease.mileageLimitKm, fuelPolicy: lease.fuelPolicy, lateFeePerDay: lease.lateFeePerDay,

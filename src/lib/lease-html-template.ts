@@ -1,21 +1,44 @@
 import { formatCurrency } from "@/lib/currency";
-import { formatDate } from "@/lib/datetime";
+import { formatDate, formatTime, formatWeekday } from "@/lib/datetime";
 
 type LeaseData = {
   id: string;
-  companyNameSnapshot: string; carSnapshot: string;
-  lesseeName: string; lesseePhone: string; lesseeCnic: string; idDocumentLabel: string;
-  lesseeNationality: string | null; lesseeAddress: string | null; lesseeWorkAddress: string | null;
-  licenseType: string | null; drivingLicenseNo: string | null;
-  plateNo: string | null; carColor: string | null; kmOut: number | null; kmIn: number | null;
-  radioCassette: boolean; airCondition: boolean; insuranceCoverage: string | null;
+  companyNameSnapshot: string; 
+  carSnapshot: string;
+  lesseeName: string; 
+  lesseePhone: string; 
+  lesseeWorkPhone: string | null; 
+  lesseeCnic: string; 
+  idDocumentLabel: string;
+  lesseeNationality: string | null; 
+  lesseeAddress: string | null; 
+  lesseeWorkAddress: string | null;
+  licenseType: string | null; 
+  drivingLicenseNo: string | null;
+  licenseIssueDate: Date | null;
+  plateNo: string | null; 
+  carColor: string | null; 
+  kmOut: number | null; kmIn: number | null;
+  radioCassette: boolean; 
+  airCondition: boolean; 
+  insuranceCoverage: string | null;
+  uncleaningFee: string | null; 
+  excessMileageRate: string | null;
   startDate: Date; endDate: Date;
-  pricePerDay: string; totalAmount: string; depositAmount: string;
-  mileageLimitKm: number | null; fuelPolicy: string; lateFeePerDay: string | null;
-  termsAndConditions: string; termsAndConditionsAr: string | null;
-  currency: string; timezone: string;
-  customerSignatureUrl: string; customerSignedAt: Date;
-  companySignatureUrl: string; companySignedAt: Date;
+  pricePerDay: string; 
+  totalAmount: string; 
+  depositAmount: string;
+  mileageLimitKm: number | null; 
+  fuelPolicy: string; 
+  lateFeePerDay: string | null;
+  termsAndConditions: string; 
+  termsAndConditionsAr: string | null;
+  currency: string; 
+  timezone: string;
+  customerSignatureUrl: string; 
+  customerSignedAt: Date;
+  companySignatureUrl: string; 
+  companySignedAt: Date;
 };
 
 function escapeHtml(str: string) {
@@ -34,6 +57,9 @@ export function buildLeaseHtml(lease: LeaseData, fontBase64: string) {
   const leaseRef = `LSE-${lease.id.slice(0, 8).toUpperCase()}`;
   const paragraphsEn = lease.termsAndConditions.split(/\n+/).filter(Boolean);
   const paragraphsAr = (lease.termsAndConditionsAr ?? "").split(/\n+/).filter(Boolean);
+
+  const days = Math.max(1, Math.ceil((lease.endDate.getTime() - lease.startDate.getTime()) / (1000 * 60 * 60 * 24)));
+  const rentTime = `${days} day${days > 1 ? "s" : ""}`;
 
   return `<!DOCTYPE html>
 <html>
@@ -56,6 +82,9 @@ export function buildLeaseHtml(lease: LeaseData, fontBase64: string) {
   table.fields td.label { color: #64748B; width: 46%; font-weight: 600; }
   table.fields td.value { font-weight: 500; }
   .ar { font-family: 'NotoArabic', sans-serif; direction: rtl; unicode-bidi: embed; color: #94A3B8; font-weight: 400; }
+  .notes { margin-top: 6px; }
+  .notes p { font-size: 9px; color: #64748B; margin: 0 0 4px 0; background: #F8FAFC; padding: 6px 8px; border-radius: 6px; }
+  .notes p .ar { display: block; text-align: right; margin-top: 2px; color: #64748B; }
   .terms-columns { display: flex; gap: 24px; margin-top: 6px; }
   .terms-col { flex: 1; font-size: 9px; line-height: 1.6; }
   .terms-col.ar-col { direction: rtl; text-align: right; font-family: 'NotoArabic', sans-serif; }
@@ -78,30 +107,42 @@ export function buildLeaseHtml(lease: LeaseData, fontBase64: string) {
 
   <div class="section-title">Vehicle &amp; Renter Details</div>
   <table class="fields">
+    ${field("No.", "الرقم", leaseRef)}
     ${field("Name", "اسم المستأجر", lease.lesseeName)}
-    ${field("Phone", "هاتف", lease.lesseePhone)}
-    ${field(lease.idDocumentLabel, "بطاقة شخصية / رقم جواز", lease.lesseeCnic)}
-    ${field("Nationality", "الجنسية", lease.lesseeNationality ?? "—")}
     ${field("Current Address", "العنوان الحالي", lease.lesseeAddress ?? "—")}
+    ${field("Tel.", "هاتف", lease.lesseePhone)}
     ${field("Work Address", "عنوان العمل", lease.lesseeWorkAddress ?? "—")}
+    ${field("Tel. (Work)", "هاتف", lease.lesseeWorkPhone ?? "—")}
+    ${field("Nationality", "الجنسية", lease.lesseeNationality ?? "—")}
     ${field("Type of License", "نوع الرخصة", lease.licenseType ?? "—")}
-    ${field("Driving License No.", "رقم رخصة القيادة", lease.drivingLicenseNo ?? "—")}
-    ${field("Type of Car", "نوع السيارة", lease.carSnapshot)}
+    ${field("Date of Issue", "تاريخ اصدار الرخصة", lease.licenseIssueDate ? formatDate(lease.licenseIssueDate, lease.timezone) : "—")}    ${field("Driving License No.", "رقم رخصة القيادة", lease.drivingLicenseNo ?? "—")}
+    ${field(lease.idDocumentLabel, "بطاقة شخصية / رقم جواز", lease.lesseeCnic)}
     ${field("Plate No.", "رقم اللوحة", lease.plateNo ?? "—")}
     ${field("Color", "اللون", lease.carColor ?? "—")}
+    ${field("Type of Car", "نوع السيارة", lease.carSnapshot)}
     ${field("K.M. Out", "الكيلومتر عند الخروج", lease.kmOut != null ? `${lease.kmOut}` : "—")}
-    ${field("K.M. In", "الكيلومتر عند العودة", lease.kmIn != null ? `${lease.kmIn}` : "—")}
+    ${field("Time Out", "وقت الخروج", formatTime(lease.startDate, lease.timezone))}
+    ${field("Date Out", "تاريخ يوم المغادرة", formatDate(lease.startDate, lease.timezone))}
+    ${field("Amount Paid", "المبلغ المدفوع", formatCurrency(lease.depositAmount, lease.currency))}
+    ${field("Daily Rent Amount", "قيمة الأجرة في اليوم", formatCurrency(lease.pricePerDay, lease.currency))}
+    ${field("Rent Time", "مدة الايجار", rentTime)}
+    ${field("Date Return", "تاريخ يوم العودة", formatDate(lease.endDate, lease.timezone))}
+    ${field("Time Back", "وقت العودة", formatTime(lease.endDate, lease.timezone))}
+    ${field("Excess K.Ms (Return)", "الكيلو متر عند العودة", lease.kmIn != null ? `${lease.kmIn}` : "—")}
     ${field("Radio / Cassette", "المسجل - الراديو", lease.radioCassette ? "Available" : "Not available")}
     ${field("Air Condition", "المكيف", lease.airCondition ? "Available" : "Not available")}
     ${field("Car Insurance", "تأمين السيارة", lease.insuranceCoverage ?? "—")}
   </table>
 
+  ${lease.uncleaningFee || lease.excessMileageRate ? `
+  <div class="notes">
+    ${lease.uncleaningFee ? `<p>If the car is returned uncleaned, ${formatCurrency(lease.uncleaningFee, lease.currency)} will be deducted from the deposit.
+      <span class="ar">في حال رجوع السيارة غير نظيفة، يتم خصم ${formatCurrency(lease.uncleaningFee, lease.currency)} من التأمين.</span></p>` : ""}
+    ${lease.excessMileageRate ? `<p>${escapeHtml(lease.excessMileageRate)}</p>` : ""}
+  </div>` : ""}
+
   <div class="section-title">Lease Period &amp; Financial Terms</div>
   <table class="fields">
-    ${field("Date Out", "تاريخ يوم المغادرة", formatDate(lease.startDate, lease.timezone))}
-    ${field("Date Return", "تاريخ يوم العودة", formatDate(lease.endDate, lease.timezone))}
-    ${field("Daily Rent Amount", "قيمة الأجرة في اليوم", formatCurrency(lease.pricePerDay, lease.currency))}
-    ${field("Amount Paid (Deposit)", "المبلغ المدفوع", formatCurrency(lease.depositAmount, lease.currency))}
     ${field("Total Amount", "المبلغ الإجمالي", formatCurrency(lease.totalAmount, lease.currency))}
     ${lease.mileageLimitKm ? field("Mileage Limit", "الحد الأقصى للمسافة", `${lease.mileageLimitKm} km`) : ""}
     ${lease.lateFeePerDay ? field("Late Fee / Day", "غرامة التأخير", formatCurrency(lease.lateFeePerDay, lease.currency)) : ""}
@@ -115,8 +156,8 @@ export function buildLeaseHtml(lease: LeaseData, fontBase64: string) {
   </div>
 
   <div class="declaration">
-    <div class="ar-block">أقر واشهد بأنني قرأت الشروط والبنود الواردة في هذا العقد وأوافق عليها، وأتعهد بدفع جميع المخالفات المرورية وأتحمل مسؤولية السيارة المستأجرة، والتزم بدفع الإيجار كاملاً.</div>
-    <div>I have read and agree to the terms and conditions of this agreement and agree to pay all charges for traffic violations, and take full responsibility for the leased vehicle.</div>
+    <div class="ar-block">اقر واشهد بأنني قرأت الشروط والبنود الواردة خلف هذا العقد وأنني موافق عليها، والتوقيع على العقد يعد تعهداً بالموافقة على جميع شروط العقد، والتعهد بدفع جميع المخالفات المرورية، وأتحمل مسؤولية السيارة التي استأجرتها حسب عقد الإيجار، وأن أقوم بدفع الإيجار كاملاً. وإذا لا سمح الله وقع على السيارة حادث أو أصيبت بعطل فني من جراء الاستخدام، سأقوم بدفع قيمة التصليح وفترة وقوف السيارة في الكراج، على أن يتم التصليح في وكالة السيارة المعتمدة، ودفع مساهمة شركة التأمين التي تقرها الشركة.</div>
+    <div>I have read and agree to the terms and conditions on the back of this agreement, and I agree to pay all charges for traffic violations. I take full responsibility for the leased vehicle for the duration of the rental agreement and agree to pay the rental amount in full. In the event of an accident or mechanical breakdown resulting from use, I will pay the repair cost and any charges for the time the vehicle is off the road, provided repairs are carried out at an authorized garage, in addition to the insurance contribution determined by the company.</div>
   </div>
 
   <div class="sig-block">
@@ -125,7 +166,7 @@ export function buildLeaseHtml(lease: LeaseData, fontBase64: string) {
       <div class="sig-line">
         <div class="sig-name">${escapeHtml(lease.lesseeName)}</div>
         <div class="sig-role">Lessee <span class="ar">/ توقيع المستأجر</span></div>
-        <div class="sig-date">Signed ${formatDate(lease.customerSignedAt, lease.timezone)}</div>
+        <div class="sig-date">${formatWeekday(lease.customerSignedAt, lease.timezone)}, ${formatDate(lease.customerSignedAt, lease.timezone)}</div>
       </div>
     </div>
     <div class="sig-col">
@@ -133,7 +174,7 @@ export function buildLeaseHtml(lease: LeaseData, fontBase64: string) {
       <div class="sig-line">
         <div class="sig-name">${escapeHtml(lease.companyNameSnapshot)}</div>
         <div class="sig-role">Authorized Representative <span class="ar">/ توقيع المسؤول</span></div>
-        <div class="sig-date">Signed ${formatDate(lease.companySignedAt, lease.timezone)}</div>
+        <div class="sig-date">${formatWeekday(lease.companySignedAt, lease.timezone)}, ${formatDate(lease.companySignedAt, lease.timezone)}</div>
       </div>
     </div>
   </div>

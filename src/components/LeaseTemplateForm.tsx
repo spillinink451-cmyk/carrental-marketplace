@@ -8,10 +8,12 @@ const inputClass = "border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full
 type Template = {
   name: string;
   termsAndConditions: string;
+  termsAndConditionsAr: string | null;
   mileageLimitKm: number | null;
   fuelPolicy: string;
   lateFeePerDay: string | null;
-  termsAndConditionsAr: string | null;
+  uncleaningFee: string | null;
+  excessMileageRate: string | null;
 } | null;
 
 export default function LeaseTemplateForm({ existing }: { existing: Template }) {
@@ -21,10 +23,11 @@ export default function LeaseTemplateForm({ existing }: { existing: Template }) 
   const [mileageLimitKm, setMileageLimitKm] = useState(existing?.mileageLimitKm?.toString() ?? "");
   const [fuelPolicy, setFuelPolicy] = useState(existing?.fuelPolicy ?? "Return with the same fuel level as at pickup.");
   const [lateFeePerDay, setLateFeePerDay] = useState(existing?.lateFeePerDay ?? "");
+  const [uncleaningFee, setUncleaningFee] = useState(existing?.uncleaningFee ?? "");
+  const [excessMileageRate, setExcessMileageRate] = useState(existing?.excessMileageRate ?? "");
   const [error, setError] = useState("");
   const [saved, setSaved] = useState(false);
   const [isPending, startTransition] = useTransition();
-  
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -34,10 +37,12 @@ export default function LeaseTemplateForm({ existing }: { existing: Template }) 
       const result = await saveLeaseTemplate({
         name,
         termsAndConditions,
+        termsAndConditionsAr: termsAndConditionsAr || undefined,
         mileageLimitKm: mileageLimitKm ? Number(mileageLimitKm) : undefined,
         fuelPolicy,
         lateFeePerDay: lateFeePerDay || undefined,
-        termsAndConditionsAr: termsAndConditionsAr || undefined,
+        uncleaningFee: uncleaningFee || undefined,
+        excessMileageRate: excessMileageRate || undefined,
       });
       if (result?.error) setError(result.error);
       else setSaved(true);
@@ -62,6 +67,17 @@ export default function LeaseTemplateForm({ existing }: { existing: Template }) 
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Uncleaned-return fee (optional)</label>
+          <input type="number" value={uncleaningFee} onChange={(e) => setUncleaningFee(e.target.value)} className={inputClass} placeholder="e.g. 2.000" />
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Excess mileage rate (optional)</label>
+          <input value={excessMileageRate} onChange={(e) => setExcessMileageRate(e.target.value)} className={inputClass} placeholder="e.g. Over 200 km/day: 50 baisa/km" />
+        </div>
+      </div>
+
       <div>
         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Fuel policy</label>
         <input value={fuelPolicy} onChange={(e) => setFuelPolicy(e.target.value)} required className={inputClass} />
@@ -74,15 +90,15 @@ export default function LeaseTemplateForm({ existing }: { existing: Template }) 
       </div>
 
       <div>
-  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">
-    Terms &amp; conditions (Arabic) — optional
-  </label>
-  <textarea
-    value={termsAndConditionsAr} onChange={(e) => setTermsAndConditionsAr(e.target.value)}
-    rows={8} dir="rtl" className={`${inputClass} text-right`}
-  />
-  <p className="text-xs text-slate-400 mt-1">Leave blank to use the platform's standard Arabic translation.</p>
-</div>
+        <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">
+          Terms &amp; conditions (Arabic) — optional
+        </label>
+        <textarea
+          value={termsAndConditionsAr} onChange={(e) => setTermsAndConditionsAr(e.target.value)}
+          rows={8} dir="rtl" className={`${inputClass} text-right`}
+        />
+        <p className="text-xs text-slate-400 mt-1">Leave blank to use the platform's standard Arabic translation.</p>
+      </div>
 
       {error && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">{error}</p>}
       {saved && <p className="text-emerald-600 text-sm bg-emerald-50 rounded-lg px-3 py-2">Saved — new leases will use these terms.</p>}
