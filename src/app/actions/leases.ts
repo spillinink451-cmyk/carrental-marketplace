@@ -10,7 +10,7 @@ import { uploadLeaseDocument } from "@/lib/r2";
 import { generateLeasePdfViaChromium } from "@/lib/lease-pdf-render";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { DEFAULT_TERMS_EN, DEFAULT_TERMS_AR } from "@/lib/default-lease-terms";
+import { DEFAULT_TERMS_EN, DEFAULT_TERMS_AR, composeTerms  } from "@/lib/default-lease-terms";
 
 
 
@@ -54,14 +54,16 @@ export async function createLeaseFromBooking(bookingId: string) {
     lateFeePerDay: template?.lateFeePerDay,
     uncleaningFee: template?.uncleaningFee,
     excessMileageRate: template?.excessMileageRate,
-    termsAndConditions: template?.termsAndConditions ?? DEFAULT_TERMS_EN,
-    termsAndConditionsAr: template?.termsAndConditionsAr ?? DEFAULT_TERMS_AR,
     createdByUserId: booking.userId, status: "draft",
     lesseeNationality: booking.driverNationality,
     lesseeAddress: booking.driverAddress,
+    lesseeWorkAddress: booking.driverWorkAddress, 
+    lesseeWorkPhone: booking.driverWorkPhone,
     licenseType: booking.driverLicenseType,
     drivingLicenseNo: booking.driverLicenseNo,
     licenseIssueDate: booking.driverLicenseIssueDate,
+    termsAndConditions: composeTerms(template?.termsAndConditions, template?.additionalTerms, DEFAULT_TERMS_EN),
+    termsAndConditionsAr: composeTerms(template?.termsAndConditionsAr, template?.additionalTermsAr, DEFAULT_TERMS_AR),
   }).returning();
 
   return lease;
@@ -74,7 +76,19 @@ export async function createStandaloneLease(input: {
   lesseePhone: string; 
   lesseeCnic: string; 
   lesseeEmail?: string;
-  startDate: string; endDate: string; 
+  
+  lesseeNationality: string;
+  lesseeAddress: string;
+  lesseeWorkAddress: string; 
+  lesseeWorkPhone: string;
+ 
+
+  licenseType: string;
+  drivingLicenseNo: string;
+  licenseIssueDate: string;
+
+  startDate: string;
+  endDate: string; 
   pricePerDay: string; 
   totalAmount: string; 
   depositAmount: string;
@@ -92,8 +106,8 @@ export async function createStandaloneLease(input: {
 
   await requireBranchAccess(car.branchId);
 
-  if (!input.lesseeName?.trim() || !input.lesseePhone?.trim() || !input.lesseeCnic?.trim()) {
-    return { error: "Lessee name, phone, and ID number are required." };
+  if (!input.lesseeName?.trim() || !input.lesseePhone?.trim() || !input.lesseeCnic?.trim() || !input.lesseeWorkAddress?.trim() || !input.lesseeWorkPhone?.trim()) {
+    return { error: "Lessee name, phone, ID number, work address, and work phone are required." };
   }
 
   const [company] = await db.select().from(companies).where(eq(companies.id, car.companyId));
@@ -107,10 +121,21 @@ export async function createStandaloneLease(input: {
   }
 
   const [lease] = await db.insert(leaseAgreements).values({
-    bookingId: null, companyId: car.companyId, carId: car.id, branchId: car.branchId,
+    bookingId: null, 
+    companyId: car.companyId, 
+    carId: car.id, branchId: car.branchId,
     templateId: template?.id, lesseeUserId,
-    lesseeName: input.lesseeName.trim(), lesseePhone: input.lesseePhone.trim(),
-    lesseeCnicEncrypted: encrypt(input.lesseeCnic.trim()), lesseeEmail: input.lesseeEmail?.trim(),
+    lesseeName: input.lesseeName.trim(), 
+    lesseePhone: input.lesseePhone.trim(),
+    lesseeCnicEncrypted: encrypt(input.lesseeCnic.trim()), 
+    lesseeEmail: input.lesseeEmail?.trim(),
+    lesseeWorkAddress: input.lesseeWorkAddress.trim(), 
+    lesseeWorkPhone: input.lesseeWorkPhone.trim(),
+    lesseeNationality: input.lesseeNationality.trim(),
+    lesseeAddress: input.lesseeAddress.trim(),
+    licenseType: input.licenseType.trim(),
+    drivingLicenseNo: input.drivingLicenseNo.trim(),
+    licenseIssueDate: new Date(input.licenseIssueDate),
     carSnapshot: `${car.brand} ${car.model}`, companyNameSnapshot: company?.name ?? "",
     startDate: new Date(input.startDate), endDate: new Date(input.endDate),
     pricePerDay: input.pricePerDay, totalAmount: input.totalAmount, depositAmount: input.depositAmount,
@@ -118,8 +143,8 @@ export async function createStandaloneLease(input: {
     lateFeePerDay: template?.lateFeePerDay,
     uncleaningFee: template?.uncleaningFee,
     excessMileageRate: template?.excessMileageRate,
-    termsAndConditions: template?.termsAndConditions ?? DEFAULT_TERMS_EN,
-    termsAndConditionsAr: template?.termsAndConditionsAr ?? DEFAULT_TERMS_AR,
+    termsAndConditions: composeTerms(template?.termsAndConditions, template?.additionalTerms, DEFAULT_TERMS_EN),
+    termsAndConditionsAr: composeTerms(template?.termsAndConditionsAr, template?.additionalTermsAr, DEFAULT_TERMS_AR),
     createdByUserId: session.user.id, status: "draft",
   }).returning();
 

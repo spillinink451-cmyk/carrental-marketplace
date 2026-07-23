@@ -6,9 +6,27 @@ import SignAndSubmit from "@/components/SignAndSubmit";
 import { signLeaseAsCustomer } from "@/app/actions/leases";
 import { formatCurrency } from "@/lib/currency";
 import { formatDate, formatDateTime } from "@/lib/datetime";
+import { User, Phone, IdCard, Globe2, MapPin, Briefcase, FileText, Car, Gauge, ShieldCheck, CheckCircle2, Clock, Download } from "lucide-react";
 
+const statusStyles: Record<string, string> = {
+  draft: "text-amber-700 bg-amber-50",
+  active: "text-emerald-600 bg-emerald-50",
+  completed: "text-slate-600 bg-slate-100",
+  terminated: "text-red-600 bg-red-50",
+  cancelled: "text-red-600 bg-red-50",
+};
 
-export const maxDuration = 30;
+function DetailRow({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <Icon className="w-4 h-4 text-slate-400 mt-0.5 shrink-0" />
+      <div>
+        <p className="text-[11px] uppercase tracking-wide text-slate-400 font-semibold">{label}</p>
+        <p className="text-sm text-slate-700 font-medium">{value || "—"}</p>
+      </div>
+    </div>
+  );
+}
 
 export default async function CustomerLeasePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -23,49 +41,88 @@ export default async function CustomerLeasePage({ params }: { params: Promise<{ 
 
   return (
     <main className="max-w-2xl mx-auto px-6 py-12">
-      <div className="bg-white border border-gray-200 rounded-[20px] p-6">
-        <span className="text-xs uppercase font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 capitalize">{lease.status}</span>
-        <h1 className="text-2xl font-bold text-slate-800 mt-3 mb-1">Lease Agreement</h1>
-        <p className="text-slate-500 mb-6">{lease.carSnapshot} · {lease.companyNameSnapshot}</p>
-
-        <div className="grid grid-cols-2 gap-4 text-sm mb-6">
-          <div><span className="text-slate-400 block text-xs">Start</span>{formatDate(lease.startDate, lease.timezone)}</div>
-          <div><span className="text-slate-400 block text-xs">End</span>{formatDate(lease.endDate, lease.timezone)}</div>
-          <div><span className="text-slate-400 block text-xs">Total</span>{formatCurrency(lease.totalAmount, lease.currency)}</div>
-          <div><span className="text-slate-400 block text-xs">Deposit</span>{formatCurrency(lease.depositAmount, lease.currency)}</div>
+      <div className="bg-white border border-gray-200 rounded-[20px] overflow-hidden shadow-sm">
+        <div className="bg-gradient-to-br from-brand to-slate-800 px-6 py-6 text-white">
+          <span className={`text-xs uppercase font-semibold px-2.5 py-1 rounded-full ${statusStyles[lease.status] ?? "bg-white/20"}`}>
+            {lease.status}
+          </span>
+          <h1 className="text-2xl font-bold mt-3 mb-1">{lease.carSnapshot}</h1>
+          <p className="text-white/80 text-sm">{lease.companyNameSnapshot}</p>
         </div>
 
-        <div className="border-t border-gray-100 pt-4 mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Your details</h2>
-          <p className="text-sm text-slate-700">{lease.lesseeName} · {lease.lesseePhone} · {lease.idDocumentLabel}: {cnic}</p>
-        </div>
+        <div className="p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm mb-8">
+            <div><span className="text-slate-400 block text-xs">Start</span>{formatDate(lease.startDate, lease.timezone)}</div>
+            <div><span className="text-slate-400 block text-xs">End</span>{formatDate(lease.endDate, lease.timezone)}</div>
+            <div><span className="text-slate-400 block text-xs">Total</span>{formatCurrency(lease.totalAmount, lease.currency)}</div>
+            <div><span className="text-slate-400 block text-xs">Deposit</span>{formatCurrency(lease.depositAmount, lease.currency)}</div>
+          </div>
 
-        <div className="border-t border-gray-100 pt-4 mb-6">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-2">Terms & Conditions</h2>
-          <p className="text-sm text-slate-600 whitespace-pre-wrap">{lease.termsAndConditions}</p>
-        </div>
-        {lease.termsAndConditionsAr && (
-        <div dir="rtl" className="font-arabic text-sm text-slate-600 whitespace-pre-wrap mt-4 pt-4 border-t border-gray-100 text-right">
-          {lease.termsAndConditionsAr}
-        </div>
-      )}
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-4">Your Details</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+            <DetailRow icon={User} label="Name" value={lease.lesseeName} />
+            <DetailRow icon={Phone} label="Phone" value={lease.lesseePhone} />
+            <DetailRow icon={IdCard} label={lease.idDocumentLabel} value={cnic} />
+            <DetailRow icon={Globe2} label="Nationality" value={lease.lesseeNationality ?? ""} />
+            <DetailRow icon={MapPin} label="Address" value={lease.lesseeAddress ?? ""} />
+            <DetailRow icon={Briefcase} label="Work address" value={lease.lesseeWorkAddress ?? ""} />
+            <DetailRow icon={Briefcase} label="Work phone" value={lease.lesseeWorkPhone ?? ""} />
+            <DetailRow icon={FileText} label="License type" value={lease.licenseType ?? ""} />
+            <DetailRow icon={FileText} label="License no." value={lease.drivingLicenseNo ?? ""} />
+          </div>
 
-        <div className="border-t border-gray-100 pt-4 mb-4">
-          <h2 className="font-semibold text-slate-800 mb-3">Your signature</h2>
-          {lease.customerSignatureUrl ? (
-            <p className="text-sm text-emerald-600">✓ Signed on {formatDateTime(lease.customerSignedAt!, lease.timezone)}</p>
-          ) : (
-            <SignAndSubmit leaseId={lease.id} label="Sign here to accept the lease" onSign={signLeaseAsCustomer} />
+          {(lease.plateNo || lease.carColor) && (
+            <>
+              <h2 className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-4">Vehicle Details</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+                <DetailRow icon={Car} label="Plate / Color" value={`${lease.plateNo ?? "—"} · ${lease.carColor ?? "—"}`} />
+                <DetailRow icon={Gauge} label="KM Out / In" value={`${lease.kmOut ?? "—"} / ${lease.kmIn ?? "—"}`} />
+                <DetailRow icon={ShieldCheck} label="Insurance" value={lease.insuranceCoverage ?? ""} />
+              </div>
+            </>
+          )}
+
+          <details className="border-t border-gray-100 pt-4 mb-6">
+            <summary className="cursor-pointer text-sm font-semibold text-slate-800 flex items-center gap-2">
+              <FileText className="w-4 h-4 text-brand" /> Terms &amp; Conditions
+            </summary>
+            <div className="mt-3 text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">{lease.termsAndConditions}</div>
+            {lease.termsAndConditionsAr && (
+              <div dir="rtl" className="font-arabic text-sm text-slate-600 whitespace-pre-wrap mt-4 pt-4 border-t border-gray-100 text-right leading-relaxed">
+                {lease.termsAndConditionsAr}
+              </div>
+            )}
+          </details>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+            <div className={`rounded-xl p-4 border ${lease.customerSignatureUrl ? "bg-emerald-50 border-emerald-100" : "bg-slate-50 border-gray-200"}`}>
+              <div className="flex items-center gap-2 mb-1">
+                {lease.customerSignatureUrl ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Clock className="w-4 h-4 text-slate-400" />}
+                <span className="text-sm font-semibold text-slate-800">Your signature</span>
+              </div>
+              {lease.customerSignatureUrl ? (
+                <p className="text-xs text-emerald-700">Signed {formatDateTime(lease.customerSignedAt!, lease.timezone)}</p>
+              ) : (
+                <div className="mt-2"><SignAndSubmit leaseId={lease.id} label="Sign here to accept the lease" onSign={signLeaseAsCustomer} /></div>
+              )}
+            </div>
+            <div className={`rounded-xl p-4 border ${lease.companySignatureUrl ? "bg-emerald-50 border-emerald-100" : "bg-slate-50 border-gray-200"}`}>
+              <div className="flex items-center gap-2 mb-1">
+                {lease.companySignatureUrl ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <Clock className="w-4 h-4 text-slate-400" />}
+                <span className="text-sm font-semibold text-slate-800">Company signature</span>
+              </div>
+              <p className="text-xs text-slate-500">
+                {lease.companySignatureUrl ? `Signed ${formatDateTime(lease.companySignedAt!, lease.timezone)}` : "Waiting for company"}
+              </p>
+            </div>
+          </div>
+
+          {lease.status === "active" && (
+            <a href={`/api/leases/${lease.id}/pdf`} className="flex items-center justify-center gap-2 bg-brand hover:bg-brand-dark text-white font-semibold text-sm py-3 rounded-full transition-colors">
+              <Download className="w-4 h-4" /> Download signed PDF
+            </a>
           )}
         </div>
-
-        <p className="text-sm text-slate-400 mb-4">
-          {lease.companySignatureUrl ? `✓ Company signed on ${formatDateTime(lease.companySignedAt!, lease.timezone)}` : "Waiting for company signature."}
-        </p>
-
-        {lease.status === "active" && (
-          <a href={`/api/leases/${lease.id}/pdf`} className="text-brand text-sm font-medium underline">Download signed PDF</a>
-        )}
       </div>
     </main>
   );

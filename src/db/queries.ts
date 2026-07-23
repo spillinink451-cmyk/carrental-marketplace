@@ -27,9 +27,12 @@ export async function getUserProfile(userId: string) {
     cnic: user.cnicEncrypted ? decrypt(user.cnicEncrypted) : null,
     nationality: user.nationality,
     address: user.address,
+    workAddress: user.workAddress,
+    workPhone: user.workPhone,
     licenseType: user.licenseType,
     licenseNo: user.licenseNo,
     licenseIssueDate: user.licenseIssueDate,
+
   };
 }
 

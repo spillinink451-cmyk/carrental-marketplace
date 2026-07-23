@@ -17,6 +17,8 @@ export async function createBooking(input: {
   driverCnic: string;
   driverNationality: string;
   driverAddress: string;
+  driverWorkAddress: string;
+  driverWorkPhone: string;
   driverLicenseType: string;
   driverLicenseNo: string;
   driverLicenseIssueDate: string;
@@ -27,8 +29,9 @@ export async function createBooking(input: {
   }
 
   if (
-    !input.driverName?.trim() || !input.driverPhone?.trim() || !input.driverCnic?.trim() ||
+!   !input.driverName?.trim() || !input.driverPhone?.trim() || !input.driverCnic?.trim() ||
     !input.driverNationality?.trim() || !input.driverAddress?.trim() ||
+    !input.driverWorkAddress?.trim() || !input.driverWorkPhone?.trim() ||
     !input.driverLicenseType?.trim() || !input.driverLicenseNo?.trim() || !input.driverLicenseIssueDate
   ) {
     return { error: "Please fill in all driver and license details." };
@@ -114,6 +117,8 @@ export async function createBooking(input: {
         driverCnic: encrypt(input.driverCnic.trim()),
         driverNationality: input.driverNationality.trim(),
         driverAddress: input.driverAddress.trim(),
+        driverWorkAddress: input.driverWorkAddress.trim(),
+        driverWorkPhone: input.driverWorkPhone.trim(),
         driverLicenseType: input.driverLicenseType.trim(),
         driverLicenseNo: input.driverLicenseNo.trim(),
         driverLicenseIssueDate: new Date(input.driverLicenseIssueDate),
@@ -136,6 +141,8 @@ export async function createBooking(input: {
       cnicEncrypted: encrypt(input.driverCnic.trim()),
       nationality: input.driverNationality.trim(),
       address: input.driverAddress.trim(),
+      workAddress: input.driverWorkAddress.trim(),
+      workPhone: input.driverWorkPhone.trim(),
       licenseType: input.driverLicenseType.trim(),
       licenseNo: input.driverLicenseNo.trim(),
       licenseIssueDate: new Date(input.driverLicenseIssueDate),

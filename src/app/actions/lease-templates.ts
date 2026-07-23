@@ -10,6 +10,8 @@ export async function saveLeaseTemplate(input: {
   name: string;
   termsAndConditions?: string;
   termsAndConditionsAr?: string;
+  additionalTerms?: string;
+  additionalTermsAr?: string;
   mileageLimitKm?: number;
   fuelPolicy: string;
   lateFeePerDay?: string;
@@ -33,6 +35,8 @@ export async function saveLeaseTemplate(input: {
     name: input.name.trim(),
     termsAndConditions: input.termsAndConditions?.trim() || null,
     termsAndConditionsAr: input.termsAndConditionsAr?.trim() || null,
+    additionalTerms: input.additionalTerms?.trim() || null,
+    additionalTermsAr: input.additionalTermsAr?.trim() || null,
     mileageLimitKm: input.mileageLimitKm,
     fuelPolicy: input.fuelPolicy.trim(),
     lateFeePerDay: input.lateFeePerDay,

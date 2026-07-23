@@ -1,4 +1,3 @@
-// src/components/NewLeaseForm.tsx
 "use client";
 
 import { useState, useTransition } from "react";
@@ -12,6 +11,13 @@ export default function NewLeaseForm({ cars }: { cars: { id: string; brand: stri
   const [lesseePhone, setLesseePhone] = useState("");
   const [lesseeCnic, setLesseeCnic] = useState("");
   const [lesseeEmail, setLesseeEmail] = useState("");
+  const [lesseeNationality, setLesseeNationality] = useState("");
+  const [lesseeAddress, setLesseeAddress] = useState("");
+  const [lesseeWorkAddress, setLesseeWorkAddress] = useState("");
+  const [lesseeWorkPhone, setLesseeWorkPhone] = useState("");
+  const [licenseType, setLicenseType] = useState("");
+  const [drivingLicenseNo, setDrivingLicenseNo] = useState("");
+  const [licenseIssueDate, setLicenseIssueDate] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [pricePerDay, setPricePerDay] = useState("");
@@ -23,12 +29,44 @@ export default function NewLeaseForm({ cars }: { cars: { id: string; brand: stri
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
-    if (!carId || !lesseeName || !lesseePhone || !lesseeCnic || !startDate || !endDate || !pricePerDay || !totalAmount || !depositAmount) {
+    if (
+      !carId || 
+      !lesseeName || 
+      !lesseePhone || 
+      !lesseeCnic ||
+      !lesseeNationality || 
+      !lesseeAddress || 
+      !lesseeWorkAddress || 
+      !lesseeWorkPhone || 
+      !licenseType || 
+      !drivingLicenseNo || 
+      !licenseIssueDate ||
+      !startDate || !endDate || 
+      !pricePerDay || 
+      !totalAmount || !depositAmount
+    ) {
       setError("Please fill in all required fields.");
       return;
     }
     startTransition(async () => {
-      const result = await createStandaloneLease({ carId, lesseeName, lesseePhone, lesseeCnic, lesseeEmail: lesseeEmail || undefined, startDate, endDate, pricePerDay, totalAmount, depositAmount });
+      const result = await createStandaloneLease({
+        carId, 
+        lesseeName, 
+        lesseePhone, 
+        lesseeCnic, 
+        lesseeEmail: lesseeEmail || undefined,
+        lesseeNationality, 
+        lesseeAddress, 
+        lesseeWorkAddress, 
+        lesseeWorkPhone, 
+        licenseType, 
+        drivingLicenseNo, 
+        licenseIssueDate,
+        startDate, endDate, 
+        pricePerDay, 
+        totalAmount, 
+        depositAmount,
+      });
       if (result?.error) setError(result.error);
     });
   }
@@ -39,6 +77,7 @@ export default function NewLeaseForm({ cars }: { cars: { id: string; brand: stri
         {cars.length === 0 && <option value="">No cars available</option>}
         {cars.map((c) => <option key={c.id} value={c.id}>{c.brand} {c.model}</option>)}
       </select>
+
       <div className="grid grid-cols-2 gap-3">
         <input placeholder="Lessee full name" value={lesseeName} onChange={(e) => setLesseeName(e.target.value)} required className={inputClass} />
         <input placeholder="Phone" value={lesseePhone} onChange={(e) => setLesseePhone(e.target.value)} required className={inputClass} />
@@ -48,6 +87,23 @@ export default function NewLeaseForm({ cars }: { cars: { id: string; brand: stri
         <input placeholder="Email (optional — links account)" value={lesseeEmail} onChange={(e) => setLesseeEmail(e.target.value)} className={inputClass} />
       </div>
       <div className="grid grid-cols-2 gap-3">
+        <input placeholder="Nationality" value={lesseeNationality} onChange={(e) => setLesseeNationality(e.target.value)} required className={inputClass} />
+        <input placeholder="Current address" value={lesseeAddress} onChange={(e) => setLesseeAddress(e.target.value)} required className={inputClass} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <input placeholder="Work address (optional)" value={lesseeWorkAddress} onChange={(e) => setLesseeWorkAddress(e.target.value)} className={inputClass} />
+        <input placeholder="Work phone (optional)" value={lesseeWorkPhone} onChange={(e) => setLesseeWorkPhone(e.target.value)} className={inputClass} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <input placeholder="License type" value={licenseType} onChange={(e) => setLicenseType(e.target.value)} required className={inputClass} />
+        <input placeholder="Driving license no." value={drivingLicenseNo} onChange={(e) => setDrivingLicenseNo(e.target.value)} required className={inputClass} />
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="text-xs text-slate-400 block mb-1">License date of issue</label>
+        <input type="date" value={licenseIssueDate} onChange={(e) => setLicenseIssueDate(e.target.value)} required className={inputClass} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-3">
         <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} required className={inputClass} />
         <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} required className={inputClass} />
       </div>
@@ -56,6 +112,7 @@ export default function NewLeaseForm({ cars }: { cars: { id: string; brand: stri
         <input type="number" placeholder="Total" value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} required className={inputClass} />
         <input type="number" placeholder="Deposit" value={depositAmount} onChange={(e) => setDepositAmount(e.target.value)} required className={inputClass} />
       </div>
+
       {error && <p className="text-red-600 text-sm bg-red-50 rounded-lg px-3 py-2">{error}</p>}
       <button disabled={isPending} className="bg-brand hover:bg-brand-dark text-white font-semibold text-sm py-3 rounded-full w-full disabled:opacity-50">
         {isPending ? "Creating..." : "Create lease"}

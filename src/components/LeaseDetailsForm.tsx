@@ -6,20 +6,9 @@ import { updateLeaseVehicleDetails } from "@/app/actions/lease-details";
 const inputClass = "border border-gray-200 rounded-xl px-3 py-2 text-sm w-full";
 
 type Lease = {
-  id: string; 
-  lesseeNationality: string | null; 
-  lesseeAddress: string | null; 
-  lesseeWorkAddress: string | null;
-  lesseeWorkPhone: string | null;
-  licenseType: string | null; 
-  licenseIssueDate: Date | null | string; 
-  drivingLicenseNo: string | null;
-  plateNo: string | null; 
-  carColor: string | null; 
-  kmOut: number | null; kmIn: number | null;
-  radioCassette: boolean; 
-  airCondition: boolean; 
-  insuranceCoverage: string | null;
+  id: string;
+  plateNo: string | null; carColor: string | null; kmOut: number | null; kmIn: number | null;
+  radioCassette: boolean; airCondition: boolean; insuranceCoverage: string | null;
 };
 
 function Field({ enLabel, arLabel, children }: { enLabel: string; arLabel: string; children: React.ReactNode }) {
@@ -34,14 +23,6 @@ function Field({ enLabel, arLabel, children }: { enLabel: string; arLabel: strin
 }
 
 export default function LeaseDetailsForm({ lease }: { lease: Lease }) {
-  const [nationality, setNationality] = useState(lease.lesseeNationality ?? "");
-  const [address, setAddress] = useState(lease.lesseeAddress ?? "");
-  const [workAddress, setWorkAddress] = useState(lease.lesseeWorkAddress ?? "");
-  const [workPhone, setWorkPhone] = useState(lease.lesseeWorkPhone ?? "");
-  const [licenseType, setLicenseType] = useState(lease.licenseType ?? "");
-  const [licenseIssueDate, setLicenseIssueDate] = useState(
-  lease.licenseIssueDate ? new Date(lease.licenseIssueDate).toISOString().split("T")[0] : "");
-  const [drivingLicenseNo, setDrivingLicenseNo] = useState(lease.drivingLicenseNo ?? "");
   const [plateNo, setPlateNo] = useState(lease.plateNo ?? "");
   const [carColor, setCarColor] = useState(lease.carColor ?? "");
   const [kmOut, setKmOut] = useState(lease.kmOut?.toString() ?? "");
@@ -57,10 +38,8 @@ export default function LeaseDetailsForm({ lease }: { lease: Lease }) {
     setSaved(false);
     startTransition(async () => {
       await updateLeaseVehicleDetails(lease.id, {
-        lesseeNationality: nationality, lesseeAddress: address, lesseeWorkAddress: workAddress,
-        lesseeWorkPhone: workPhone,
-        licenseType, licenseIssueDate: licenseIssueDate || undefined, drivingLicenseNo,
-        plateNo, carColor, kmOut: kmOut ? Number(kmOut) : undefined, kmIn: kmIn ? Number(kmIn) : undefined,
+        plateNo, carColor,
+        kmOut: kmOut ? Number(kmOut) : undefined, kmIn: kmIn ? Number(kmIn) : undefined,
         radioCassette, airCondition, insuranceCoverage,
       });
       setSaved(true);
@@ -69,14 +48,10 @@ export default function LeaseDetailsForm({ lease }: { lease: Lease }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      <p className="text-xs text-slate-400 -mt-1">
+        Renter and license details are already captured from the booking — these are just the physical handover facts.
+      </p>
       <div className="grid grid-cols-2 gap-3">
-        <Field enLabel="Nationality" arLabel="الجنسية"><input value={nationality} onChange={(e) => setNationality(e.target.value)} className={inputClass} /></Field>
-        <Field enLabel="Type of License" arLabel="نوع الرخصة"><input value={licenseType} onChange={(e) => setLicenseType(e.target.value)} className={inputClass} /></Field>
-        <Field enLabel="Current Address" arLabel="العنوان الحالي"><input value={address} onChange={(e) => setAddress(e.target.value)} className={inputClass} /></Field>
-        <Field enLabel="Work Address" arLabel="عنوان العمل"><input value={workAddress} onChange={(e) => setWorkAddress(e.target.value)} className={inputClass} /></Field>
-        <Field enLabel="Work Phone" arLabel="هاتف العمل"><input value={workPhone} onChange={(e) => setWorkPhone(e.target.value)} className={inputClass} /></Field>
-        <Field enLabel="Driving License No." arLabel="رقم رخصة القيادة"><input value={drivingLicenseNo} onChange={(e) => setDrivingLicenseNo(e.target.value)} className={inputClass} /></Field>
-        <Field enLabel="License Date of Issue" arLabel="تاريخ اصدار الرخصة"><input type="date" value={licenseIssueDate} onChange={(e) => setLicenseIssueDate(e.target.value)} className={inputClass} /></Field>
         <Field enLabel="Plate No." arLabel="رقم اللوحة"><input value={plateNo} onChange={(e) => setPlateNo(e.target.value)} className={inputClass} /></Field>
         <Field enLabel="Color" arLabel="اللون"><input value={carColor} onChange={(e) => setCarColor(e.target.value)} className={inputClass} /></Field>
         <Field enLabel="KM Out" arLabel="الكيلومتر عند الخروج"><input type="number" value={kmOut} onChange={(e) => setKmOut(e.target.value)} className={inputClass} /></Field>
@@ -97,7 +72,7 @@ export default function LeaseDetailsForm({ lease }: { lease: Lease }) {
 
       {saved && <p className="text-emerald-600 text-sm bg-emerald-50 rounded-lg px-3 py-2">Saved.</p>}
       <button disabled={isPending} className="bg-brand hover:bg-brand-dark text-white font-semibold text-sm py-2.5 px-6 rounded-full disabled:opacity-50">
-        {isPending ? "Saving..." : "Save vehicle & renter details"}
+        {isPending ? "Saving..." : "Save vehicle details"}
       </button>
     </form>
   );

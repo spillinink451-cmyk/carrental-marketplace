@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { companyUsers, companies, cars, bookings, branches, carCategories, carModels, carBrands } from "@/db/schema";
+import { companyUsers, companies, cars, bookings, branches, carCategories, carModels, carBrands, countries } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import { decrypt } from "@/lib/encryption";
@@ -77,8 +77,14 @@ export async function requireCarForCompany(carId: string) {
 
 export async function requireBookingForCompany(bookingId: string) {
   const ctx = await requirePartnerCompany();
-  const [booking] = await db.select().from(bookings).where(and(eq(bookings.id, bookingId), eq(bookings.companyId, ctx.companyId)));
-  if (!booking) throw new Error("Booking not found for this company");
+  const [row] = await db
+    .select({ booking: bookings, idDocumentLabel: countries.idDocumentLabel })
+    .from(bookings)
+    .innerJoin(companies, eq(bookings.companyId, companies.id))
+    .innerJoin(countries, eq(companies.country, countries.code))
+    .where(and(eq(bookings.id, bookingId), eq(bookings.companyId, ctx.companyId)));
+  if (!row) throw new Error("Booking not found for this company");
+  const booking = row.booking;
   if (ctx.role !== "owner" && booking.pickupBranchId !== ctx.branchId) throw new Error("Not authorized for this booking's branch");
-  return { ...booking, driverCnic: decrypt(booking.driverCnic) };
+  return { ...booking, driverCnic: decrypt(booking.driverCnic), idDocumentLabel: row.idDocumentLabel };
 }

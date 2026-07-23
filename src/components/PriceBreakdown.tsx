@@ -20,6 +20,8 @@ export default function PriceBreakdown({
   initialDriverCnic = "",
   initialDriverNationality = "",
   initialDriverAddress = "",
+  initialDriverWorkAddress = "",
+  initialDriverWorkPhone = "",
   initialDriverLicenseType = "",
   initialDriverLicenseNo = "",
   initialDriverLicenseIssueDate = "",
@@ -35,6 +37,8 @@ export default function PriceBreakdown({
   initialDriverCnic?: string;
   initialDriverNationality?: string;
   initialDriverAddress?: string;
+  initialDriverWorkAddress?: string;
+  initialDriverWorkPhone?: string;
   initialDriverLicenseType?: string;
   initialDriverLicenseNo?: string;
   initialDriverLicenseIssueDate?: string;
@@ -50,6 +54,8 @@ export default function PriceBreakdown({
   const [driverCnic, setDriverCnic] = useState(initialDriverCnic);
   const [driverNationality, setDriverNationality] = useState(initialDriverNationality);
   const [driverAddress, setDriverAddress] = useState(initialDriverAddress);
+  const [driverWorkAddress, setDriverWorkAddress] = useState(initialDriverWorkAddress);
+  const [driverWorkPhone, setDriverWorkPhone] = useState(initialDriverWorkPhone);
   const [driverLicenseType, setDriverLicenseType] = useState(initialDriverLicenseType);
   const [driverLicenseNo, setDriverLicenseNo] = useState(initialDriverLicenseNo);
   const [driverLicenseIssueDate, setDriverLicenseIssueDate] = useState(initialDriverLicenseIssueDate);
@@ -81,6 +87,8 @@ export default function PriceBreakdown({
         driverCnic,
         driverNationality,
         driverAddress, 
+        driverWorkAddress,
+        driverWorkPhone,
         driverLicenseType, 
         driverLicenseNo, 
         driverLicenseIssueDate,
@@ -159,6 +167,16 @@ export default function PriceBreakdown({
 <div>
   <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Current address</label>
   <input value={driverAddress} onChange={(e) => setDriverAddress(e.target.value)}
+    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" required />
+</div>
+<div>
+  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Work address</label>
+  <input value={driverWorkAddress} onChange={(e) => setDriverWorkAddress(e.target.value)}
+    className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" required />
+</div>
+<div>
+  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Work phone</label>
+  <input value={driverWorkPhone} onChange={(e) => setDriverWorkPhone(e.target.value)}
     className="border border-gray-200 rounded-xl px-3 py-2.5 text-sm w-full" required />
 </div>
 <div className="grid grid-cols-2 gap-3">
