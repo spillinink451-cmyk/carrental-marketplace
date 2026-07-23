@@ -8,7 +8,7 @@ import { revalidatePath } from "next/cache";
 
 export async function saveLeaseTemplate(input: {
   name: string;
-  termsAndConditions: string;
+  termsAndConditions?: string;
   termsAndConditionsAr?: string;
   mileageLimitKm?: number;
   fuelPolicy: string;
@@ -18,8 +18,8 @@ export async function saveLeaseTemplate(input: {
 }) {
   const ctx = await requireCompanyOwner();
 
-  if (!input.name?.trim() || !input.termsAndConditions?.trim() || !input.fuelPolicy?.trim()) {
-    return { error: "Name, terms, and fuel policy are required." };
+  if (!input.name?.trim() || !input.fuelPolicy?.trim()) {
+    return { error: "Name and fuel policy are required." };
   }
 
   const [existing] = await db
@@ -31,13 +31,13 @@ export async function saveLeaseTemplate(input: {
 
   const values = {
     name: input.name.trim(),
-    termsAndConditions: input.termsAndConditions.trim(),
-    termsAndConditionsAr: input.termsAndConditionsAr?.trim() || undefined,
+    termsAndConditions: input.termsAndConditions?.trim() || null,
+    termsAndConditionsAr: input.termsAndConditionsAr?.trim() || null,
     mileageLimitKm: input.mileageLimitKm,
     fuelPolicy: input.fuelPolicy.trim(),
     lateFeePerDay: input.lateFeePerDay,
     uncleaningFee: input.uncleaningFee,
-    excessMileageRate: input.excessMileageRate?.trim() || undefined,
+    excessMileageRate: input.excessMileageRate?.trim() || null,
   };
 
   if (existing) {

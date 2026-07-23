@@ -80,6 +80,10 @@ export default async function BookingConfirmationPage({
             <p><span className="text-slate-400">Name:</span> {booking.driverName}</p>
             <p><span className="text-slate-400">Phone:</span> {booking.driverPhone}</p>
             <p><span className="text-slate-400">{booking.idDocumentLabel}:</span> {booking.driverCnic}</p>
+            <p><span className="text-slate-400">Nationality:</span> {booking.driverNationality || "—"}</p>
+            <p><span className="text-slate-400">Address:</span> {booking.driverAddress || "—"}</p>
+            <p><span className="text-slate-400">License type:</span> {booking.driverLicenseType || "—"}</p>
+            <p><span className="text-slate-400">License no.:</span> {booking.driverLicenseNo || "—"}</p>
           </div>
         </div>
 

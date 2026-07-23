@@ -126,7 +126,7 @@ export async function createStandaloneLease(input: {
   redirect(`/partner/leases/${lease.id}`);
 }
 
-async function finalizeIfFullySigned(leaseId: string) {
+export async function regenerateLeasePdfIfSigned(leaseId: string) {
   const [lease] = await db.select().from(leaseAgreements).where(eq(leaseAgreements.id, leaseId));
   if (!lease || !lease.customerSignatureUrl || !lease.companySignatureUrl) return;
 
@@ -176,7 +176,7 @@ export async function signLeaseAsCustomer(leaseId: string, signatureUrl: string)
   if (lease.customerSignatureUrl) return { error: "Already signed." };
 
   await db.update(leaseAgreements).set({ customerSignatureUrl: signatureUrl, customerSignedAt: new Date() }).where(eq(leaseAgreements.id, leaseId));
-  await finalizeIfFullySigned(leaseId);
+  await regenerateLeasePdfIfSigned(leaseId);
   revalidatePath(`/leases/${leaseId}`);
   return { success: true };
 }
@@ -190,7 +190,7 @@ export async function captureWalkInCustomerSignature(leaseId: string, signatureU
   if (lease.customerSignatureUrl) return { error: "Already signed." };
 
   await db.update(leaseAgreements).set({ customerSignatureUrl: signatureUrl, customerSignedAt: new Date() }).where(eq(leaseAgreements.id, leaseId));
-  await finalizeIfFullySigned(leaseId);
+  await regenerateLeasePdfIfSigned(leaseId);
   revalidatePath(`/partner/leases/${leaseId}`);
   return { success: true };
 }
@@ -204,7 +204,7 @@ export async function signLeaseAsCompany(leaseId: string, signatureUrl: string) 
   if (lease.companySignatureUrl) return { error: "Already signed." };
 
   await db.update(leaseAgreements).set({ companySignatureUrl: signatureUrl, companySignedAt: new Date(), companySignedByUserId: session.user.id }).where(eq(leaseAgreements.id, leaseId));
-  await finalizeIfFullySigned(leaseId);
+  await regenerateLeasePdfIfSigned(leaseId);
   revalidatePath(`/partner/leases/${leaseId}`);
   return { success: true };
 }

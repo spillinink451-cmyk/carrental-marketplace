@@ -7,7 +7,7 @@ const inputClass = "border border-gray-200 rounded-xl px-4 py-2.5 text-sm w-full
 
 type Template = {
   name: string;
-  termsAndConditions: string;
+  termsAndConditions: string | null;
   termsAndConditionsAr: string | null;
   mileageLimitKm: number | null;
   fuelPolicy: string;
@@ -85,8 +85,8 @@ export default function LeaseTemplateForm({ existing }: { existing: Template }) 
 
       <div>
         <label className="text-xs font-semibold text-slate-500 uppercase tracking-wide block mb-1.5">Terms &amp; conditions</label>
-        <textarea value={termsAndConditions} onChange={(e) => setTermsAndConditions(e.target.value)} required rows={8} className={inputClass} />
-        <p className="text-xs text-slate-400 mt-1">Separate paragraphs with a blank line — they'll render as distinct paragraphs on the signed PDF.</p>
+        <textarea value={termsAndConditions} onChange={(e) => setTermsAndConditions(e.target.value)} rows={8} className={inputClass} />
+        <p className="text-xs text-slate-400 mt-1">Leave blank to use the platform's standard terms. Separate paragraphs with a blank line.</p>
       </div>
 
       <div>

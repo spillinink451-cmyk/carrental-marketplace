@@ -5,6 +5,7 @@ import { leaseAgreements } from "@/db/schema";
 import { requireBranchAccess } from "@/lib/partner-auth";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { regenerateLeasePdfIfSigned } from "./leases";
 
 export async function updateLeaseVehicleDetails(leaseId: string, input: {
   lesseeNationality?: string; 
@@ -23,7 +24,7 @@ export async function updateLeaseVehicleDetails(leaseId: string, input: {
   airCondition: boolean; 
   insuranceCoverage?: string;
 }) {
-  const [lease] = await db.select().from(leaseAgreements).where(eq(leaseAgreements.id, leaseId));
+   const [lease] = await db.select().from(leaseAgreements).where(eq(leaseAgreements.id, leaseId));
   if (!lease) return { error: "Lease not found." };
   await requireBranchAccess(lease.branchId);
 
@@ -43,6 +44,7 @@ export async function updateLeaseVehicleDetails(leaseId: string, input: {
     insuranceCoverage: input.insuranceCoverage,
   }).where(eq(leaseAgreements.id, leaseId));
 
+  await regenerateLeasePdfIfSigned(leaseId);
   revalidatePath(`/partner/leases/${leaseId}`);
   return { success: true };
 }
