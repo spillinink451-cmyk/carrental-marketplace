@@ -412,3 +412,51 @@ export async function getLeaseTemplateForCompany(companyId: string) {
     .limit(1);
   return template ?? null;
 }
+
+export async function getAdminDashboardStats() {
+  const [companyCounts] = await db
+    .select({
+      total: sql<number>`count(*)::int`,
+      pending: sql<number>`count(*) filter (where status = 'pending')::int`,
+      active: sql<number>`count(*) filter (where status = 'active')::int`,
+      suspended: sql<number>`count(*) filter (where status = 'suspended')::int`,
+    })
+    .from(companies);
+
+  const [carCount] = await db.select({ count: sql<number>`count(*)::int` }).from(cars);
+  const [bookingCount] = await db.select({ count: sql<number>`count(*)::int` }).from(bookings);
+  const [openDisputeCount] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(disputes)
+    .where(sql`status in ('open', 'under_review')`);
+  const [leaseCount] = await db.select({ count: sql<number>`count(*)::int` }).from(leaseAgreements);
+
+  return {
+    companies: companyCounts,
+    cars: carCount?.count ?? 0,
+    bookings: bookingCount?.count ?? 0,
+    openDisputes: openDisputeCount?.count ?? 0,
+    leases: leaseCount?.count ?? 0,
+  };
+}
+
+export async function getAllDisputesForAdmin() {
+  return db
+    .select({
+      id: disputes.id, type: disputes.type, description: disputes.description,
+      status: disputes.status, createdAt: disputes.createdAt, resolutionNotes: disputes.resolutionNotes,
+      bookingId: disputes.bookingId, evidencePhotos: disputes.evidencePhotos,
+      companyName: companies.name, carBrand: carBrands.name, carModel: carModels.name,
+    })
+    .from(disputes)
+    .innerJoin(bookings, eq(disputes.bookingId, bookings.id))
+    .innerJoin(companies, eq(bookings.companyId, companies.id))
+    .innerJoin(cars, eq(bookings.carId, cars.id))
+    .innerJoin(carBrands, eq(cars.brandId, carBrands.id))
+    .innerJoin(carModels, eq(cars.modelId, carModels.id))
+    .orderBy(sql`case when ${disputes.status} in ('open', 'under_review') then 0 else 1 end, ${disputes.createdAt} desc`);
+}
+
+export async function getPendingCompaniesForAdmin() {
+  return db.select().from(companies).where(eq(companies.status, "pending")).orderBy(sql`${companies.createdAt} desc`);
+}

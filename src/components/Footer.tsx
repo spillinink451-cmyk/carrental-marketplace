@@ -14,6 +14,7 @@ export default function Footer() {
         <div>
           <p className="text-white font-semibold text-sm mb-4">Company</p>
           <ul className="space-y-2.5 text-sm text-slate-400">
+            <li><Link href="/partner/register" className="hover:text-white transition-colors">List your car</Link></li>
             <li><Link href="/" className="hover:text-white transition-colors">About</Link></li>
             <li><Link href="/" className="hover:text-white transition-colors">Help Center</Link></li>
             <li><Link href="/" className="hover:text-white transition-colors">Contact</Link></li>

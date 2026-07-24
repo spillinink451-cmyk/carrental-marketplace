@@ -6,7 +6,7 @@ import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
 
-export default function Nav({ partnerRole }: { partnerRole: "owner" | "branch_admin" | "staff" | null }) {
+export default function Nav({ partnerRole, isAdmin }: { partnerRole: "owner" | "branch_admin" | "staff" | null; isAdmin: boolean }) {
   const pathname = usePathname();
   const { data: session } = useSession();
   const isHome = pathname === "/";
@@ -55,11 +55,18 @@ export default function Nav({ partnerRole }: { partnerRole: "owner" | "branch_ad
                     solid ? "text-brand bg-brand/10" : "text-white bg-white/15"
                   }`}
                 >
+
+                  
                   <span className="sm:hidden">Dashboard</span>
                   <span className="hidden sm:inline">Partner Dashboard</span>
                   <span className="hidden sm:inline text-[10px] uppercase opacity-70 capitalize">{partnerRole.replace("_", " ")}</span>
                 </Link>
               )}
+                                {isAdmin && (
+  <Link href="/admin" className={`text-sm font-medium ${solid ? "text-slate-600" : "text-white/90"} hover:opacity-70 transition-opacity`}>
+    Admin
+  </Link>
+)}
               <Link href="/bookings" className={`text-sm font-medium ${solid ? "text-slate-600" : "text-white/90"} hover:opacity-70 transition-opacity`}>
                 My bookings
               </Link>

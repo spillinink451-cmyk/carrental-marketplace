@@ -98,6 +98,8 @@ const profile = session?.user?.id ? await getUserProfile(session.user.id) : null
                 </p>
 
                 <p>{car.address}</p>
+
+                
               </div>
             </section>
 

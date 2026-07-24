@@ -29,7 +29,7 @@ export async function createBooking(input: {
   }
 
   if (
-!   !input.driverName?.trim() || !input.driverPhone?.trim() || !input.driverCnic?.trim() ||
+    !input.driverName?.trim() || !input.driverPhone?.trim() || !input.driverCnic?.trim() ||
     !input.driverNationality?.trim() || !input.driverAddress?.trim() ||
     !input.driverWorkAddress?.trim() || !input.driverWorkPhone?.trim() ||
     !input.driverLicenseType?.trim() || !input.driverLicenseNo?.trim() || !input.driverLicenseIssueDate

@@ -13,9 +13,11 @@ const statusStyles: Record<string, string> = {
   disputed: "text-red-600 bg-red-50",
 };
 
-export default async function PartnerDashboard() {
+export default async function PartnerDashboard({ searchParams }: { searchParams?: { welcome?: string } }) {
   const ctx = await requirePartnerCompany();
   const isOwner = ctx.role === "owner";
+
+  const params = await searchParams ?? {};
 
   const [carsList, bookingsList] = await Promise.all([
     isOwner ? getCarsByCompany(ctx.companyId) : getCarsByBranch(ctx.branchId!),
@@ -25,6 +27,18 @@ export default async function PartnerDashboard() {
   return (
     <main className="max-w-4xl mx-auto px-6 py-12">
       <PartnerNav />
+
+       
+
+{params.welcome && ctx.companyStatus === "pending" && (
+  <div className="bg-amber-50 border border-amber-100 rounded-[20px] p-5 mb-6">
+    <p className="font-semibold text-amber-800">Company submitted for review</p>
+    <p className="text-sm text-amber-700 mt-1">
+      Your company is pending admin approval. You can already add branches and cars while you wait —
+      they'll go live automatically the moment your company is approved.
+    </p>
+  </div>
+)}
 
       <h1 className="text-2xl font-bold text-slate-800 mb-1">{ctx.companyName}</h1>
       <div className="flex items-center gap-2 mb-8">

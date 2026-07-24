@@ -36,13 +36,16 @@ export default async function RootLayout({
 const session = await auth();
 
 const partnerLink = session?.user?.id ? await getPartnerLinkForUser(session.user.id) : null;
+const isAdmin = !!session?.user?.email && (process.env.ADMIN_EMAILS ?? "").split(",").map((e) => e.trim()).includes(session.user.email);
+
 
 
   return (
     <html lang="en" className={`${inter.variable} ${notoArabic.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans bg-canvas text-slate-800">
         <Providers>
-          <Nav partnerRole={partnerLink?.role ?? null} />
+          <Nav partnerRole={partnerLink?.role ?? null} isAdmin={isAdmin} />
+          
           {children}
         </Providers>
         <Footer />
